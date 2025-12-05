@@ -25,7 +25,7 @@ export const Step1Welcome: React.FC<Step1WelcomeProps> = ({
     <Card>
       <div className="max-w-2xl mx-auto text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Find Your Perfect Energy Plan
+          🔋 Find Your Perfect Energy Plan - UPDATED
         </h1>
         <p className="text-lg text-gray-600 mb-8">
           Upload your Green Button XML usage data and get personalized recommendations
