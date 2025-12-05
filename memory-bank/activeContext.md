@@ -54,7 +54,7 @@ The Energy Plan Recommendation Agent MVP is **COMPLETE, DEPLOYED, AND LIVE** in 
 - Monitor performance improvements and cost savings
 - Document migration results and update deployment procedures
 
-**Status**: ✅ **VERCEL MIGRATION COMPLETE** - Successfully deployed to production with zero functionality loss
+**Status**: ✅ **VERCEL MIGRATION COMPLETE** - Successfully deployed to production with zero functionality loss. Site loads at https://EnergyPlan.vercel.app (not energy-plan-mvp.vercel.app)
 
 ## Recent Changes (MVP Completion)
 
