@@ -40,12 +40,16 @@ npm install
 3. Set up environment variables:
 Create a `.env.local` file in the root directory:
 ```env
-UTILITY_API_KEY=your_utility_api_key_here
-ARCADIA_API_KEY=your_arcadia_api_key_here
+EIA_API_KEY=your_eia_api_key_here
+# EIA_API_KEY can be obtained from https://www.eia.gov/opendata/register.php
+# Legacy support: UTILITY_API_KEY will be used as fallback if EIA_API_KEY is not set
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-**Note**: For MVP testing, the application uses mock data if API keys are not provided.
+**Note**: 
+- EIA API provides statistical energy data (not retail supplier/plan catalogs)
+- Supplier and plan data are currently static/mock data
+- For MVP testing, the application uses mock data if API keys are not provided
 
 ### Development
 

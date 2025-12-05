@@ -12,10 +12,12 @@ services:
         value: production
       - key: NEXT_PUBLIC_APP_URL
         fromSecret: app-url
+      - key: EIA_API_KEY
+        fromSecret: eia-api-key
+      # Legacy support: UTILITY_API_KEY can be used as fallback
       - key: UTILITY_API_KEY
         fromSecret: utility-api-key
-      - key: ARCADIA_API_KEY
-        fromSecret: arcadia-api-key
+        optional: true
     healthCheckPath: /
     plan: starter
     region: oregon

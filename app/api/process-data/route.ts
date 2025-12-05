@@ -55,13 +55,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Get API keys from environment
-    const utilityApiKey = process.env.UTILITY_API_KEY || '';
-    const arcadiaApiKey = process.env.ARCADIA_API_KEY || utilityApiKey; // Fallback to same key for MVP
+    // EIA API key is used for energy statistics (EIA doesn't provide retail supplier/plan catalogs)
+    const eiaApiKey = process.env.EIA_API_KEY || process.env.UTILITY_API_KEY || '';
+    
+    // Note: EIA API provides statistical data, not retail supplier/plan catalogs
+    // Supplier and plan data are currently static/mock data
+    // In the future, this could be replaced with a retail supplier/plan API
 
-    // Get available plans
+    // Get available plans (currently static data)
     let plans;
     try {
-      plans = await getPlans(arcadiaApiKey);
+      plans = await getPlans(eiaApiKey);
     } catch (error) {
       console.error('Error fetching plans:', error);
       return NextResponse.json(
@@ -85,7 +89,7 @@ export async function POST(request: NextRequest) {
         usageData,
         preferences,
         plans,
-        utilityApiKey
+        eiaApiKey
       );
 
       // Update confidence based on data quality

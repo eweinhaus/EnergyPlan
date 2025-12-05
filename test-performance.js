@@ -27,13 +27,13 @@ console.log('\n2. Testing processing speed simulation...');
 
 const startTime = Date.now();
 
-// Simulate XML parsing (using sample data)
-const xmlContent = fs.readFileSync('sample-green-button.xml', 'utf8');
+// Test with actual XML parsing
+const xmlContent = fs.readFileSync('samples/sample-1-complete.xml', 'utf8');
 const parseTime = Date.now() - startTime;
 
-console.log(`   XML parsing time: ${parseTime}ms`);
+console.log(`   XML parsing time (${(xmlContent.length / 1024).toFixed(1)}KB file): ${parseTime}ms`);
 
-// Simulate cost calculations
+// Simulate cost calculations with realistic data
 const mockUsageData = {
   monthlyTotals: Array.from({ length: 12 }, (_, i) => ({
     month: `2024-${String(i + 1).padStart(2, '0')}`,
@@ -112,6 +112,24 @@ const recommendationTime = Date.now() - recommendationStart;
 
 console.log(`   Recommendation algorithm: ${recommendationTime}ms`);
 console.log(`   Total processing time: ${parseTime + calculationTime + recommendationTime}ms`);
+
+// Test with different file sizes
+console.log('\n3. Testing different file sizes...');
+
+const testFiles = ['samples/sample-3-minimal.xml', 'samples/sample-2-partial.xml', 'samples/sample-1-complete.xml'];
+
+for (const file of testFiles) {
+  try {
+    const fileStartTime = Date.now();
+    const content = fs.readFileSync(file, 'utf8');
+    const fileParseTime = Date.now() - fileStartTime;
+    const fileSizeMB = content.length / (1024 * 1024);
+
+    console.log(`   ${file}: ${fileSizeMB.toFixed(2)}MB - ${fileParseTime}ms`);
+  } catch (error) {
+    console.log(`   ${file}: Error reading file`);
+  }
+}
 
 // Performance targets
 const totalProcessingTime = parseTime + calculationTime + recommendationTime;

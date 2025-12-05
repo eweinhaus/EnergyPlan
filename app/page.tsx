@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { ConsentBanner, ConsentState } from '@/components/ui/ConsentBanner';
+import { DataProcessingTransparency } from '@/components/ui/DataProcessingTransparency';
 import { Step1Welcome } from '@/components/form/Step1Welcome';
 import { Step2CurrentPlan } from '@/components/form/Step2CurrentPlan';
 import { Step3FileUpload } from '@/components/form/Step3FileUpload';
@@ -9,6 +12,7 @@ import { Step4Preferences } from '@/components/form/Step4Preferences';
 import { Step5Review } from '@/components/form/Step5Review';
 import { RecommendationList } from '@/components/recommendations/RecommendationList';
 import { EnergyPlanFormData, Recommendation } from '@/lib/types';
+import { setupUnloadDataDeletion } from '@/lib/dataDeletion';
 
 const TOTAL_STEPS = 5;
 
@@ -20,6 +24,7 @@ export default function Home() {
   const [qualityScore, setQualityScore] = useState<number | undefined>();
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [consent, setConsent] = useState<ConsentState | null>(null);
   const [formData, setFormData] = useState<EnergyPlanFormData>({
     currentPlan: {
       supplier: '',
@@ -31,9 +36,10 @@ export default function Home() {
     },
   });
 
-  // Clear localStorage on mount to ensure fresh start
+  // Clear localStorage on mount to ensure fresh start and setup data deletion
   useEffect(() => {
     localStorage.removeItem('energyPlanFormData');
+    setupUnloadDataDeletion();
   }, []);
 
   // Save to localStorage whenever formData changes
@@ -137,6 +143,10 @@ export default function Home() {
     localStorage.removeItem('energyPlanFormData');
   };
 
+  const handleConsentChange = (newConsent: ConsentState) => {
+    setConsent(newConsent);
+  };
+
   const renderStep = () => {
     // Show results if available
     if (currentStep === 6 && recommendations) {
@@ -189,45 +199,60 @@ export default function Home() {
     switch (currentStep) {
       case 1:
         return (
-          <Step1Welcome
-            onNext={handleNext}
-          />
+          <div className="space-y-4">
+            <Step1Welcome
+              onNext={handleNext}
+            />
+            <DataProcessingTransparency currentStep={currentStep} />
+          </div>
         );
       case 2:
         return (
-          <Step2CurrentPlan
-            onNext={handleNext}
-            onBack={handleBack}
-            currentPlan={formData.currentPlan}
-            onCurrentPlanChange={handleCurrentPlanChange}
-          />
+          <div className="space-y-4">
+            <Step2CurrentPlan
+              onNext={handleNext}
+              onBack={handleBack}
+              currentPlan={formData.currentPlan}
+              onCurrentPlanChange={handleCurrentPlanChange}
+            />
+            <DataProcessingTransparency currentStep={currentStep} />
+          </div>
         );
       case 3:
         return (
-          <Step3FileUpload
-            onNext={handleNext}
-            onBack={handleBack}
-            onFileSelect={handleFileSelect}
-            selectedFile={formData.xmlFile}
-          />
+          <div className="space-y-4">
+            <Step3FileUpload
+              onNext={handleNext}
+              onBack={handleBack}
+              onFileSelect={handleFileSelect}
+              selectedFile={formData.xmlFile}
+            />
+            <DataProcessingTransparency currentStep={currentStep} />
+          </div>
         );
       case 4:
         return (
-          <Step4Preferences
-            onNext={handleNext}
-            onBack={handleBack}
-            preferences={formData.preferences}
-            onPreferencesChange={handlePreferencesChange}
-          />
+          <div className="space-y-4">
+            <Step4Preferences
+              onNext={handleNext}
+              onBack={handleBack}
+              preferences={formData.preferences}
+              onPreferencesChange={handlePreferencesChange}
+            />
+            <DataProcessingTransparency currentStep={currentStep} />
+          </div>
         );
       case 5:
         return (
-          <Step5Review
-            onBack={handleBack}
-            formData={formData}
-            onSubmit={handleSubmit}
-            isProcessing={isProcessing}
-          />
+          <div className="space-y-4">
+            <Step5Review
+              onBack={handleBack}
+              formData={formData}
+              onSubmit={handleSubmit}
+              isProcessing={isProcessing}
+            />
+            <DataProcessingTransparency currentStep={currentStep} />
+          </div>
         );
       default:
         return null;
@@ -235,16 +260,38 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        {currentStep > 1 && currentStep <= TOTAL_STEPS && (
-          <div className="mb-8">
-            <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
+    <>
+      <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {currentStep > 1 && currentStep <= TOTAL_STEPS && (
+            <div className="mb-8">
+              <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
+            </div>
+          )}
+          {renderStep()}
+        </div>
+
+        {/* Footer */}
+        <footer className="mt-16 py-8 border-t border-gray-200">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+              <div className="text-sm text-gray-600">
+                © 2025 AI Energy Plan Recommendation Agent. All rights reserved.
+              </div>
+              <div className="flex space-x-6 text-sm">
+                <Link href="/privacy-policy" className="text-gray-600 hover:text-primary-600 transition-colors">
+                  Privacy Policy
+                </Link>
+                <Link href="/data-rights" className="text-gray-600 hover:text-primary-600 transition-colors">
+                  Data Rights
+                </Link>
+              </div>
+            </div>
           </div>
-        )}
-        {renderStep()}
-      </div>
-    </main>
+        </footer>
+      </main>
+      <ConsentBanner onConsent={handleConsentChange} />
+    </>
   );
 }
 
