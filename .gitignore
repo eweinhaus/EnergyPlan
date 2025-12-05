@@ -43,3 +43,7 @@ memory-bank/
 # documentation files (except README)
 *.md
 !README.md
+
+# Firebase functions platform-specific binaries (too large for git)
+functions/node_modules/**/*.node
+functions/node_modules/**/.DS_Store
