@@ -208,3 +208,4 @@ export const ConsentManager: React.FC<ConsentManagerProps> = ({ onConsentChange 
     </Card>
   );
 };
+

@@ -187,3 +187,4 @@ export const DataProcessingTransparency: React.FC<DataProcessingTransparencyProp
     </Card>
   );
 };
+

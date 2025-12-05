@@ -250,3 +250,4 @@ describe('Offline Functionality', () => {
     expect(typeof manager.getIsOnline()).toBe('boolean');
   });
 });
+

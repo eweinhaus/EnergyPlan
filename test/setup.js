@@ -55,3 +55,4 @@ global.fetch = jest.fn(() =>
 // Suppress console warnings during tests
 global.console.warn = jest.fn();
 global.console.error = jest.fn();
+

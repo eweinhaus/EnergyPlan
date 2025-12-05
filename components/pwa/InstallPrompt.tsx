@@ -133,3 +133,4 @@ export const InstallPrompt: React.FC = () => {
     </div>
   );
 };
+
