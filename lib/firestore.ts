@@ -1,17 +1,34 @@
-import {
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  orderBy,
-  limit,
-  Timestamp,
-  deleteDoc,
-} from 'firebase/firestore';
 import { db } from './firebase';
+
+// Dynamic imports to avoid SSR issues
+let doc: any;
+let setDoc: any;
+let getDoc: any;
+let collection: any;
+let query: any;
+let where: any;
+let getDocs: any;
+let orderBy: any;
+let limit: any;
+let Timestamp: any;
+let deleteDoc: any;
+
+const loadFirestore = async () => {
+  if (typeof window !== 'undefined') {
+    const firestoreModule = await import('firebase/firestore');
+    doc = firestoreModule.doc;
+    setDoc = firestoreModule.setDoc;
+    getDoc = firestoreModule.getDoc;
+    collection = firestoreModule.collection;
+    query = firestoreModule.query;
+    where = firestoreModule.where;
+    getDocs = firestoreModule.getDocs;
+    orderBy = firestoreModule.orderBy;
+    limit = firestoreModule.limit;
+    Timestamp = firestoreModule.Timestamp;
+    deleteDoc = firestoreModule.deleteDoc;
+  }
+};
 
 // Helper function to check if Firebase is available
 const isFirebaseAvailable = () => {
@@ -29,6 +46,7 @@ import {
 
 // User Profile Operations
 export const createUserProfile = async (userId: string, email: string, displayName?: string): Promise<void> => {
+  await loadFirestore();
   if (!isFirebaseAvailable()) {
     throw new Error('Firebase is not available');
   }
@@ -57,6 +75,7 @@ export const createUserProfile = async (userId: string, email: string, displayNa
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  await loadFirestore();
   if (!isFirebaseAvailable()) {
     return null;
   }
@@ -76,6 +95,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile | null
 };
 
 export const updateUserProfile = async (userId: string, updates: Partial<UserProfile>): Promise<void> => {
+  await loadFirestore();
   const userDoc = doc(db, 'users', userId);
   await setDoc(userDoc, updates, { merge: true });
 };
@@ -86,6 +106,7 @@ export const saveRecommendation = async (
   formData: EnergyPlanFormData,
   recommendations: Recommendation[]
 ): Promise<string> => {
+  await loadFirestore();
   const recommendationsRef = collection(db, 'recommendations');
   const newDoc = doc(recommendationsRef);
 
@@ -104,6 +125,7 @@ export const getUserRecommendations = async (
   userId: string,
   limitCount: number = 20
 ): Promise<SavedRecommendation[]> => {
+  await loadFirestore();
   const q = query(
     collection(db, 'recommendations'),
     where('userId', '==', userId),
@@ -112,7 +134,7 @@ export const getUserRecommendations = async (
   );
 
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({
+  return querySnapshot.docs.map((doc: any) => ({
     id: doc.id,
     ...doc.data(),
     createdAt: doc.data().createdAt.toDate(),
@@ -120,6 +142,7 @@ export const getUserRecommendations = async (
 };
 
 export const getRecommendation = async (recommendationId: string): Promise<SavedRecommendation | null> => {
+  await loadFirestore();
   const docRef = doc(db, 'recommendations', recommendationId);
   const docSnap = await getDoc(docRef);
 
@@ -134,6 +157,7 @@ export const getRecommendation = async (recommendationId: string): Promise<Saved
 };
 
 export const deleteRecommendation = async (recommendationId: string): Promise<void> => {
+  await loadFirestore();
   await deleteDoc(doc(db, 'recommendations', recommendationId));
 };
 
@@ -158,6 +182,7 @@ export const saveUsageData = async (
 };
 
 export const getUserUsageData = async (userId: string): Promise<UsageDataRecord[]> => {
+  await loadFirestore();
   const q = query(
     collection(db, 'usageData'),
     where('userId', '==', userId),
@@ -165,7 +190,7 @@ export const getUserUsageData = async (userId: string): Promise<UsageDataRecord[
   );
 
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({
+  return querySnapshot.docs.map((doc: any) => ({
     id: doc.id,
     ...doc.data(),
     createdAt: doc.data().createdAt.toDate(),
@@ -196,6 +221,7 @@ export const logAuditEvent = async (
 
 // GDPR Compliance Operations
 export const exportUserData = async (userId: string): Promise<any> => {
+  await loadFirestore();
   const [profile, recommendations, usageData, auditLogs] = await Promise.all([
     getUserProfile(userId),
     getUserRecommendations(userId, 100), // Get all recommendations
@@ -213,6 +239,7 @@ export const exportUserData = async (userId: string): Promise<any> => {
 };
 
 export const deleteUserData = async (userId: string): Promise<string[]> => {
+  await loadFirestore();
   const deletedCollections: string[] = [];
 
   // Delete user profile
@@ -270,7 +297,7 @@ const getUserAuditLogs = async (userId: string): Promise<AuditLog[]> => {
   );
 
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({
+  return querySnapshot.docs.map((doc: any) => ({
     id: doc.id,
     ...doc.data(),
     timestamp: doc.data().timestamp.toDate(),

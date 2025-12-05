@@ -1,6 +1,9 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client';
 
+// Force dynamic rendering to avoid SSR issues
+export const runtime = 'edge';
+
 import React from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';

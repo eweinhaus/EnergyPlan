@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 
-// Force dynamic rendering for Firebase Functions
-export const dynamic = 'force-dynamic';
+// Force dynamic rendering to avoid SSR issues with Firebase
+export const runtime = 'edge';
 import Link from 'next/link';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { ConsentBanner, ConsentState } from '@/components/ui/ConsentBanner';

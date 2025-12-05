@@ -22,34 +22,41 @@ const createMockDb = () => ({
   doc: () => ({ set: async () => {}, get: async () => ({ exists: () => false, data: () => ({}) }) }),
 });
 
-// Initialize Firebase (client-side only)
+// Initialize Firebase (client-side only with dynamic imports)
 let app: any = null;
 let auth: any = createMockAuth();
 let db: any = createMockDb();
 
-if (typeof window !== 'undefined') {
-  try {
-    const { initializeApp } = require('firebase/app');
-    const { getAuth, connectAuthEmulator } = require('firebase/auth');
-    const { getFirestore, connectFirestoreEmulator } = require('firebase/firestore');
+const initializeFirebase = async () => {
+  if (typeof window !== 'undefined' && !app) {
+    try {
+      const { initializeApp } = await import('firebase/app');
+      const { getAuth, connectAuthEmulator } = await import('firebase/auth');
+      const { getFirestore, connectFirestoreEmulator } = await import('firebase/firestore');
 
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
 
-    // Connect to emulators in development
-    if (process.env.NODE_ENV === 'development') {
-      try {
-        connectAuthEmulator(auth, "http://localhost:9099");
-        connectFirestoreEmulator(db, 'localhost', 8080);
-        console.log('Connected to Firebase emulators');
-      } catch (error) {
-        console.log('Failed to connect to emulators:', error);
+      // Connect to emulators in development
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          connectAuthEmulator(auth, "http://localhost:9099");
+          connectFirestoreEmulator(db, 'localhost', 8080);
+          console.log('Connected to Firebase emulators');
+        } catch (error) {
+          console.log('Failed to connect to emulators:', error);
+        }
       }
+    } catch (error) {
+      console.error('Failed to initialize Firebase:', error);
     }
-  } catch (error) {
-    console.error('Failed to initialize Firebase:', error);
   }
+};
+
+// Initialize on first access
+if (typeof window !== 'undefined') {
+  initializeFirebase();
 }
 
 // Export with fallbacks for SSR

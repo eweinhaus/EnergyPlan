@@ -1,20 +1,32 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  User,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  sendPasswordResetEmail,
-} from 'firebase/auth';
 import { auth } from './firebase';
 
+// Dynamic imports to avoid SSR issues
+let signInWithEmailAndPassword: any;
+let createUserWithEmailAndPassword: any;
+let firebaseSignOut: any;
+let onAuthStateChanged: any;
+let GoogleAuthProvider: any;
+let signInWithPopup: any;
+let sendPasswordResetEmail: any;
+
+const loadFirebaseAuth = async () => {
+  if (typeof window !== 'undefined') {
+    const authModule = await import('firebase/auth');
+    signInWithEmailAndPassword = authModule.signInWithEmailAndPassword;
+    createUserWithEmailAndPassword = authModule.createUserWithEmailAndPassword;
+    firebaseSignOut = authModule.signOut;
+    onAuthStateChanged = authModule.onAuthStateChanged;
+    GoogleAuthProvider = authModule.GoogleAuthProvider;
+    signInWithPopup = authModule.signInWithPopup;
+    sendPasswordResetEmail = authModule.sendPasswordResetEmail;
+  }
+};
+
 interface AuthContextType {
-  user: User | null;
+  user: any;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
@@ -26,37 +38,50 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
+    loadFirebaseAuth().then(() => {
+      if (onAuthStateChanged) {
+        const unsubscribe = onAuthStateChanged(auth, (user: any) => {
+          setUser(user);
+          setLoading(false);
+        });
+        return () => unsubscribe();
+      }
     });
-
-    return () => unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    if (signInWithEmailAndPassword) {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
   };
 
   const signUp = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password);
+    if (createUserWithEmailAndPassword) {
+      await createUserWithEmailAndPassword(auth, email, password);
+    }
   };
 
   const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    if (GoogleAuthProvider && signInWithPopup) {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    }
   };
 
   const signOut = async () => {
-    await firebaseSignOut(auth);
+    if (firebaseSignOut) {
+      await firebaseSignOut(auth);
+    }
   };
 
   const resetPassword = async (email: string) => {
-    await sendPasswordResetEmail(auth, email);
+    if (sendPasswordResetEmail) {
+      await sendPasswordResetEmail(auth, email);
+    }
   };
 
   const value: AuthContextType = {
