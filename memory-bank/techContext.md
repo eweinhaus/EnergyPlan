@@ -10,7 +10,7 @@
 - **Build Tool**: Next.js built-in (Webpack/Turbopack)
 
 ### Backend
-- **Runtime**: Node.js 18.17+ (LTS) - tested with Node.js 25.1.0
+- **Runtime**: Node.js 24.x (LTS) - tested with Node.js 25.1.0
 - **Framework**: Next.js API Routes
 - **Processing**: In-memory Node.js processing
 - **No Database**: MVP uses in-memory data only
@@ -30,7 +30,7 @@
 ## Development Environment Setup
 
 ### Prerequisites
-- Node.js 18.17+ installed (tested with 25.1.0)
+- Node.js 24.x installed (tested with 25.1.0)
 - npm package manager
 - Git for version control
 
@@ -152,7 +152,7 @@ EnergyPlan/
 ## Technical Constraints
 
 ### Runtime Constraints
-- **Node.js Version**: Must be 18.17+ (LTS) - tested with 25.1.0
+- **Node.js Version**: Must be 24.x (LTS) - tested with 25.1.0
 - **Browser Support**: Modern browsers (Chrome, Firefox, Safari, Edge)
 - **File Size Limits**: Maximum 10MB XML files
 - **Memory**: Efficient processing for large XML files (<50MB estimated)
@@ -257,7 +257,7 @@ node monitor-deployment.js [command]
 ### Build Configuration
 - **Build Command**: `npm run build`
 - **Start Command**: `npm start`
-- **Node Version**: 18.x (or higher)
+- **Node Version**: 24.x (or higher)
 - **Environment Variables**: Set in Render dashboard
 
 ### Deployment Process
