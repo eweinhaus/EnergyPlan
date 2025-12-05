@@ -193,25 +193,123 @@ async function fetchPlansWithRetry(
   console.log('Using mock plan data as fallback');
   const suppliers = await fetchSuppliersWithRetry(apiKey);
 
-  // Generate static plans based on suppliers
+  // Generate static plans based on suppliers with advanced rate structures
   const plans: Plan[] = [];
   suppliers.forEach((supplier, index) => {
-    // Create 2-3 plans per supplier with varying rates
-    const planCount = 2 + (index % 2);
+    // Create 2-4 plans per supplier with varying rates and structures
+    const planCount = 2 + (index % 3);
     for (let j = 0; j < planCount; j++) {
       const baseRate = 8 + (index * 0.5) + (j * 0.3);
-      plans.push({
-        id: `${supplier.id}-${j + 1}`,
-        supplierId: supplier.id,
-        supplierName: supplier.name,
-        name: `${supplier.name} ${j === 0 ? 'Fixed Rate' : j === 1 ? 'Green Choice' : 'Premium'}`,
-        rate: Math.round(baseRate * 100) / 100,
-        renewablePercentage: j === 1 ? 100 : j === 2 ? 50 : 0,
-        fees: {
-          delivery: 3.5 + (j * 0.2),
-          admin: 5.0,
-        },
-      });
+      const planType = j % 4; // 0: fixed, 1: tiered, 2: TOU, 3: seasonal
+
+      let plan: Plan;
+
+      switch (planType) {
+        case 0: // Fixed rate
+          plan = {
+            id: `${supplier.id}-${j + 1}`,
+            supplierId: supplier.id,
+            supplierName: supplier.name,
+            name: `${supplier.name} Fixed Rate`,
+            rate: Math.round(baseRate * 100) / 100,
+            renewablePercentage: j === 1 ? 100 : j === 2 ? 50 : 0,
+            fees: {
+              delivery: 3.5 + (j * 0.2),
+              admin: 5.0,
+            },
+          };
+          break;
+
+        case 1: // Tiered rate (Texas residential tiers)
+          plan = {
+            id: `${supplier.id}-${j + 1}`,
+            supplierId: supplier.id,
+            supplierName: supplier.name,
+            name: `${supplier.name} Tiered Rate`,
+            rate: Math.round(baseRate * 100) / 100, // fallback rate
+            renewablePercentage: j === 1 ? 100 : j === 2 ? 50 : 0,
+            fees: {
+              delivery: 3.5 + (j * 0.2),
+              admin: 5.0,
+            },
+            rateStructure: {
+              type: 'tiered',
+              tiered: {
+                tiers: [
+                  { minKwh: 0, maxKwh: 500, ratePerKwh: Math.round((baseRate - 1) * 100) / 100 },
+                  { minKwh: 501, maxKwh: 1000, ratePerKwh: Math.round(baseRate * 100) / 100 },
+                  { minKwh: 1001, maxKwh: 999999, ratePerKwh: Math.round((baseRate + 1) * 100) / 100 },
+                ],
+              },
+            },
+          };
+          break;
+
+        case 2: // Time-of-Use rate
+          plan = {
+            id: `${supplier.id}-${j + 1}`,
+            supplierId: supplier.id,
+            supplierName: supplier.name,
+            name: `${supplier.name} Time-of-Use`,
+            rate: Math.round(baseRate * 100) / 100, // fallback rate
+            renewablePercentage: j === 1 ? 100 : j === 2 ? 50 : 0,
+            fees: {
+              delivery: 3.5 + (j * 0.2),
+              admin: 5.0,
+            },
+            rateStructure: {
+              type: 'tou',
+              tou: {
+                peakHours: { start: '16:00', end: '21:00', ratePerKwh: Math.round((baseRate + 2) * 100) / 100 },
+                offPeakRatePerKwh: Math.round((baseRate - 2) * 100) / 100,
+                superOffPeakRatePerKwh: Math.round((baseRate - 3) * 100) / 100,
+              },
+            },
+          };
+          break;
+
+        case 3: // Seasonal rate
+          plan = {
+            id: `${supplier.id}-${j + 1}`,
+            supplierId: supplier.id,
+            supplierName: supplier.name,
+            name: `${supplier.name} Seasonal Rate`,
+            rate: Math.round(baseRate * 100) / 100, // fallback rate
+            renewablePercentage: j === 1 ? 100 : j === 2 ? 50 : 0,
+            fees: {
+              delivery: 3.5 + (j * 0.2),
+              admin: 5.0,
+            },
+            rateStructure: {
+              type: 'seasonal',
+              seasonal: {
+                winterRatePerKwh: Math.round((baseRate - 1) * 100) / 100,
+                summerRatePerKwh: Math.round((baseRate + 1) * 100) / 100,
+                seasonalMonths: {
+                  winter: [0, 1, 2, 3, 9, 10, 11], // Jan-Apr, Oct-Dec
+                  summer: [4, 5, 6, 7, 8], // May-Sep
+                },
+              },
+            },
+          };
+          break;
+
+        default:
+          plan = {
+            id: `${supplier.id}-${j + 1}`,
+            supplierId: supplier.id,
+            supplierName: supplier.name,
+            name: `${supplier.name} Fixed Rate`,
+            rate: Math.round(baseRate * 100) / 100,
+            renewablePercentage: j === 1 ? 100 : j === 2 ? 50 : 0,
+            fees: {
+              delivery: 3.5 + (j * 0.2),
+              admin: 5.0,
+            },
+          };
+      }
+
+      plans.push(plan);
     }
   });
 

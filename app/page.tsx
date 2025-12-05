@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { ConsentBanner, ConsentState } from '@/components/ui/ConsentBanner';
 import { DataProcessingTransparency } from '@/components/ui/DataProcessingTransparency';
+import { UserStatus } from '@/components/auth/UserStatus';
 import { Step1Welcome } from '@/components/form/Step1Welcome';
 import { Step2CurrentPlan } from '@/components/form/Step2CurrentPlan';
 import { Step3FileUpload } from '@/components/form/Step3FileUpload';
@@ -13,10 +14,13 @@ import { Step5Review } from '@/components/form/Step5Review';
 import { RecommendationList } from '@/components/recommendations/RecommendationList';
 import { EnergyPlanFormData, Recommendation } from '@/lib/types';
 import { setupUnloadDataDeletion } from '@/lib/dataDeletion';
+import { useAuth } from '@/lib/auth';
+import { saveRecommendation, createUserProfile } from '@/lib/firestore';
 
 const TOTAL_STEPS = 5;
 
 export default function Home() {
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [recommendations, setRecommendations] = useState<Recommendation[] | null>(null);
@@ -25,6 +29,7 @@ export default function Home() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [consent, setConsent] = useState<ConsentState | null>(null);
+  const [savingToAccount, setSavingToAccount] = useState(false);
   const [formData, setFormData] = useState<EnergyPlanFormData>({
     currentPlan: {
       supplier: '',
@@ -102,17 +107,39 @@ export default function Home() {
       }
 
       const result = await response.json();
-      
+
       if (result.success && result.recommendations) {
         setRecommendations(result.recommendations);
         setDataQuality(result.dataQuality);
         setQualityScore(result.qualityScore);
         setWarnings(result.warnings || []);
+
+        // Save to Firestore if user is authenticated
+        if (user) {
+          setSavingToAccount(true);
+          try {
+            // Create user profile if it doesn't exist
+            await createUserProfile(user.uid, user.email!, user.displayName || undefined);
+
+            // Save the recommendation
+            await saveRecommendation(
+              user.uid,
+              formData,
+              result.recommendations
+            );
+          } catch (saveError) {
+            console.error('Error saving to account:', saveError);
+            // Don't block the UI flow for save errors
+          } finally {
+            setSavingToAccount(false);
+          }
+        }
+
         setCurrentStep(6); // Move to results view
       } else {
         throw new Error('Invalid response from server');
       }
-      
+
       // Clear localStorage after successful submission
       localStorage.removeItem('energyPlanFormData');
     } catch (error) {
@@ -156,6 +183,8 @@ export default function Home() {
             recommendations={recommendations}
             dataQuality={dataQuality}
             qualityScore={qualityScore}
+            savingToAccount={savingToAccount}
+            formData={formData}
           />
           <div className="text-center pt-4">
             <button
@@ -263,6 +292,21 @@ export default function Home() {
     <>
       <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
+          {/* Header with User Status */}
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Energy Plan Recommendation Agent
+              </h1>
+              <p className="text-gray-600 mt-1">
+                AI-powered energy plan recommendations for Texas residential customers
+              </p>
+            </div>
+            <div className="ml-4">
+              <UserStatus />
+            </div>
+          </div>
+
           {currentStep > 1 && currentStep <= TOTAL_STEPS && (
             <div className="mb-8">
               <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />

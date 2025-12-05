@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Alert } from '../ui/Alert';
+import { AuthModal } from '../auth/AuthModal';
+import { useAuth } from '@/lib/auth';
 import { EnergyPlanFormData } from '@/lib/types';
 
 interface Step5ReviewProps {
@@ -19,10 +21,19 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
   onSubmit,
   isProcessing,
 }) => {
+  const { user } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
+
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  };
+
+  const handleCreateAccount = () => {
+    setAuthMode('signup');
+    setShowAuthModal(true);
   };
 
   return (
@@ -121,6 +132,44 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
           </Alert>
         )}
 
+        {/* Account Creation Prompt */}
+        {!user && !isProcessing && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-blue-900 mb-2">
+              💾 Save Your Recommendations
+            </h3>
+            <p className="text-blue-700 mb-3">
+              Create a free account to save and revisit your recommendations anytime, compare plans over time, and export professional PDF reports.
+            </p>
+            <Button
+              type="button"
+              onClick={handleCreateAccount}
+              className="w-full sm:w-auto"
+            >
+              Create Free Account
+            </Button>
+          </div>
+        )}
+
+        {/* User Status Message */}
+        {user && !isProcessing && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <h3 className="text-lg font-semibold text-green-900">
+                  Welcome back, {user.displayName || user.email}!
+                </h3>
+                <p className="text-green-700">
+                  Your recommendations will be automatically saved to your account.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
           <Button
             type="button"
@@ -141,6 +190,12 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
           </Button>
         </div>
       </div>
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode={authMode}
+      />
     </Card>
   );
 };

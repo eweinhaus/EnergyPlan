@@ -46,13 +46,50 @@ export interface Plan {
   supplierId: string;
   supplierName: string;
   name: string;
-  rate: number; // cents per kWh
+  rate: number; // cents per kWh (for fixed-rate plans)
   renewablePercentage: number; // 0-100
   fees: {
     delivery: number;
     admin: number;
   };
+  rateStructure?: RateStructure; // Advanced rate structure (optional for backward compatibility)
 }
+
+export type RateStructure = {
+  type: 'fixed' | 'tiered' | 'tou' | 'variable' | 'seasonal';
+  fixed?: {
+    ratePerKwh: number; // cents
+  };
+  tiered?: {
+    tiers: Array<{
+      minKwh: number;
+      maxKwh: number;
+      ratePerKwh: number; // cents
+    }>;
+  };
+  tou?: {
+    peakHours: { start: string; end: string; ratePerKwh: number }; // "16:00-21:00"
+    offPeakRatePerKwh: number;
+    superOffPeakRatePerKwh?: number; // overnight
+  };
+  variable?: {
+    baseRatePerKwh: number;
+    marketAdjustment: 'ercot' | 'custom';
+    caps: { min: number; max: number }; // rate caps/floors in cents
+    seasonalMultipliers?: {
+      summer: number; // June-September multiplier
+      winter: number; // October-May multiplier
+    };
+  };
+  seasonal?: {
+    winterRatePerKwh: number;
+    summerRatePerKwh: number;
+    seasonalMonths: {
+      winter: number[]; // month numbers (0-11)
+      summer: number[]; // month numbers (0-11)
+    };
+  };
+};
 
 export interface PlanWithCosts extends Plan {
   annualCost: number;
@@ -72,5 +109,114 @@ export interface ProcessingResult {
   recommendations?: Recommendation[];
   error?: string;
   dataQuality?: ParsedUsageData['dataQuality'];
+}
+
+// Firebase & User Account Types
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName?: string;
+  preferences: UserPreferences;
+  createdAt: Date;
+  lastLoginAt: Date;
+  gdprConsent: GDPRConsent;
+}
+
+export interface SavedRecommendation {
+  id: string;
+  userId: string;
+  formData: EnergyPlanFormData;
+  recommendations: Recommendation[];
+  createdAt: Date;
+  pdfUrl?: string;
+}
+
+export interface UsageDataRecord {
+  id: string;
+  userId: string;
+  parsedData: ParsedUsageData;
+  originalXmlHash: string;
+  createdAt: Date;
+}
+
+export interface AuditLog {
+  id: string;
+  userId: string;
+  action: 'data_export' | 'data_deletion' | 'consent_change' | 'recommendation_saved';
+  timestamp: Date;
+  details: any;
+  ipAddress?: string;
+}
+
+// GDPR Compliance Types
+export interface GDPRConsent {
+  analytics: boolean;
+  marketing: boolean;
+  dataProcessing: boolean; // Required for core functionality
+  dataStorage: boolean;
+  lastUpdated: Date;
+  version: string;
+}
+
+export interface DataExportResult {
+  data: any;
+  exportedAt: string;
+  format: 'json' | 'pdf';
+  includesPersonalData: boolean;
+}
+
+export interface DataDeletionResult {
+  deletedCollections: string[];
+  deletedAt: string;
+  userId: string;
+}
+
+// Advanced Rate Structure Types
+export interface TieredRate {
+  tiers: Array<{
+    minKwh: number;
+    maxKwh: number;
+    ratePerKwh: number; // cents
+  }>;
+}
+
+export interface TOURate {
+  peakHours: { start: string; end: string; rate: number }; // "16:00-21:00"
+  offPeakRate: number;
+  superOffPeakRate: number; // overnight
+}
+
+export interface VariableRate {
+  baseRate: number;
+  marketAdjustment: 'ercot' | 'custom';
+  caps: { min: number; max: number };
+  seasonalMultipliers?: {
+    summer: number; // June-September
+    winter: number; // October-May
+  };
+}
+
+export interface SeasonalRate {
+  winterRate: number;
+  summerRate: number;
+  seasonalMonths: {
+    winter: number[]; // month numbers (0-11)
+    summer: number[]; // month numbers (0-11)
+  };
+}
+
+// PDF Export Types
+export interface PDFOptions {
+  includeCharts: boolean;
+  includeBranding: boolean;
+  format: 'A4' | 'Letter';
+  orientation: 'portrait' | 'landscape';
+}
+
+export interface PDFGenerationResult {
+  success: boolean;
+  url?: string;
+  error?: string;
+  generationTime: number;
 }
 

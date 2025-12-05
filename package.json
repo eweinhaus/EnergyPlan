@@ -6,9 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^3.4.4",
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
@@ -16,12 +20,34 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.0",
     "fast-xml-parser": "^5.3.2",
+    "firebase": "^10.12.2",
+    "firebase-admin": "^12.2.0",
     "next": "^14.2.0",
+    "next-pwa": "^5.6.0",
     "postcss": "^8.4.0",
+    "puppeteer": "^22.12.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.5.0"
   },
-  "devDependencies": {}
+  "jest": {
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/test"],
+    "testMatch": ["**/__tests__/**/*.test.js", "**/?(*.)+(spec|test).js"],
+    "collectCoverageFrom": [
+      "lib/**/*.{js,ts}",
+      "app/**/*.{js,ts}",
+      "components/**/*.{js,ts}",
+      "!**/*.d.ts"
+    ],
+    "setupFilesAfterEnv": ["<rootDir>/test/setup.js"],
+    "moduleNameMapping": {
+      "^@/(.*)$": "<rootDir>/$1"
+    }
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12"
+  }
 }

@@ -5,11 +5,13 @@ import {
   ParsedUsageData,
   CurrentPlanData,
   UserPreferences,
+  RateStructure,
+  MonthlyUsage,
 } from './types';
 import { getSuppliers } from './apiClients';
 
 /**
- * Calculate annual cost for a plan based on usage data
+ * Calculate annual cost for a plan based on usage data and rate structure
  */
 export function calculateAnnualCost(
   plan: Plan,
@@ -18,8 +20,8 @@ export function calculateAnnualCost(
   let totalCost = 0;
 
   for (const month of usageData.monthlyTotals) {
-    // Energy cost (rate * kWh)
-    const energyCost = (plan.rate / 100) * month.totalKwh; // Convert cents to dollars
+    // Calculate energy cost based on rate structure
+    const energyCost = calculateMonthlyEnergyCost(plan, month);
 
     // Fixed fees (delivery + admin)
     const fixedFees = plan.fees.delivery + plan.fees.admin;
@@ -32,6 +34,163 @@ export function calculateAnnualCost(
 }
 
 /**
+ * Calculate monthly energy cost based on plan's rate structure
+ */
+export function calculateMonthlyEnergyCost(plan: Plan, month: MonthlyUsage): number {
+  if (!plan.rateStructure) {
+    // Backward compatibility: use simple fixed rate
+    return (plan.rate / 100) * month.totalKwh;
+  }
+
+  switch (plan.rateStructure.type) {
+    case 'fixed':
+      return calculateFixedRateCost(plan.rateStructure, month.totalKwh);
+
+    case 'tiered':
+      return calculateTieredRateCost(plan.rateStructure, month.totalKwh);
+
+    case 'tou':
+      // For TOU rates, we need hourly data. Fall back to average rate if not available
+      return calculateFixedRateCost({ type: 'fixed', fixed: { ratePerKwh: plan.rate } }, month.totalKwh);
+
+    case 'variable':
+      return calculateVariableRateCost(plan.rateStructure, month, new Date());
+
+    case 'seasonal':
+      return calculateSeasonalRateCost(plan.rateStructure, month, new Date());
+
+    default:
+      // Fallback to fixed rate
+      return (plan.rate / 100) * month.totalKwh;
+  }
+}
+
+/**
+ * Calculate cost for fixed rate structure
+ */
+function calculateFixedRateCost(rateStructure: RateStructure, totalKwh: number): number {
+  if (!rateStructure.fixed) return 0;
+  return (rateStructure.fixed.ratePerKwh / 100) * totalKwh;
+}
+
+/**
+ * Calculate cost for tiered rate structure
+ */
+function calculateTieredRateCost(rateStructure: RateStructure, totalKwh: number): number {
+  if (!rateStructure.tiered) return 0;
+
+  let remainingKwh = totalKwh;
+  let totalCost = 0;
+
+  for (const tier of rateStructure.tiered.tiers) {
+    if (remainingKwh <= 0) break;
+
+    const tierUsage = Math.min(remainingKwh, tier.maxKwh - tier.minKwh);
+    totalCost += tierUsage * (tier.ratePerKwh / 100); // Convert cents to dollars
+    remainingKwh -= tierUsage;
+  }
+
+  return totalCost;
+}
+
+/**
+ * Calculate cost for time-of-use rate structure
+ * Note: This is a simplified version. Full TOU requires hourly usage data.
+ */
+function calculateTOURateCost(rateStructure: RateStructure, hourlyUsage: any[]): number {
+  if (!rateStructure.tou || !hourlyUsage) return 0;
+
+  let totalCost = 0;
+
+  for (const hour of hourlyUsage) {
+    const hourOfDay = hour.timestamp.getHours();
+    const isPeak = isInPeakHours(hourOfDay, rateStructure.tou.peakHours);
+
+    let rate = rateStructure.tou.offPeakRatePerKwh;
+    if (isPeak) {
+      rate = rateStructure.tou.peakHours.ratePerKwh;
+    } else if (rateStructure.tou.superOffPeakRatePerKwh && isInSuperOffPeakHours(hourOfDay)) {
+      rate = rateStructure.tou.superOffPeakRatePerKwh;
+    }
+
+    totalCost += hour.kwh * (rate / 100);
+  }
+
+  return totalCost;
+}
+
+/**
+ * Calculate cost for variable rate structure
+ */
+function calculateVariableRateCost(rateStructure: RateStructure, month: MonthlyUsage, date: Date): number {
+  if (!rateStructure.variable) return 0;
+
+  let adjustedRate = rateStructure.variable.baseRatePerKwh;
+
+  // Apply seasonal multiplier if defined
+  if (rateStructure.variable.seasonalMultipliers) {
+    const monthNum = date.getMonth();
+    const isSummer = [5, 6, 7, 8].includes(monthNum); // June-September
+    const multiplier = isSummer
+      ? rateStructure.variable.seasonalMultipliers.summer
+      : rateStructure.variable.seasonalMultipliers.winter;
+    adjustedRate *= multiplier;
+  }
+
+  // Apply market adjustment (simplified - would need real ERCOT data)
+  // For now, add a small random variation to simulate market fluctuations
+  const marketAdjustment = 1 + (Math.random() - 0.5) * 0.1; // ±5% variation
+  adjustedRate *= marketAdjustment;
+
+  // Apply caps/floors
+  adjustedRate = Math.max(
+    rateStructure.variable.caps.min,
+    Math.min(rateStructure.variable.caps.max, adjustedRate)
+  );
+
+  return (adjustedRate / 100) * month.totalKwh;
+}
+
+/**
+ * Calculate cost for seasonal rate structure
+ */
+function calculateSeasonalRateCost(rateStructure: RateStructure, month: MonthlyUsage, date: Date): number {
+  if (!rateStructure.seasonal) return 0;
+
+  const monthNum = date.getMonth();
+  const isSummer = rateStructure.seasonal.seasonalMonths.summer.includes(monthNum);
+  const rate = isSummer
+    ? rateStructure.seasonal.summerRatePerKwh
+    : rateStructure.seasonal.winterRatePerKwh;
+
+  return (rate / 100) * month.totalKwh;
+}
+
+/**
+ * Check if hour is in peak hours
+ */
+function isInPeakHours(hourOfDay: number, peakHours: { start: string; end: string }): boolean {
+  const [startHour] = peakHours.start.split(':').map(Number);
+  const [endHour] = peakHours.end.split(':').map(Number);
+
+  if (startHour <= endHour) {
+    // Same day peak hours (e.g., 16:00-21:00)
+    return hourOfDay >= startHour && hourOfDay < endHour;
+  } else {
+    // Overnight peak hours (unlikely but handled)
+    return hourOfDay >= startHour || hourOfDay < endHour;
+  }
+}
+
+/**
+ * Check if hour is in super off-peak hours (typically overnight)
+ */
+function isInSuperOffPeakHours(hourOfDay: number): boolean {
+  // Assuming super off-peak is 10 PM to 6 AM
+  return hourOfDay >= 22 || hourOfDay < 6;
+}
+
+/**
  * Calculate savings compared to current plan
  */
 export function calculateSavings(
@@ -39,18 +198,22 @@ export function calculateSavings(
   recommendedPlan: Plan,
   usageData: ParsedUsageData
 ): number {
-  const currentAnnualCost = calculateAnnualCost(
-    {
-      ...recommendedPlan,
-      rate: currentPlan.rate,
-      fees: {
-        delivery: 3.5, // Default delivery fee
-        admin: 5.0, // Default admin fee
-      },
+  // Create a mock plan object for current plan (assuming fixed rate)
+  const currentPlanMock: Plan = {
+    id: 'current',
+    supplierId: 'current',
+    supplierName: currentPlan.supplier,
+    name: 'Current Plan',
+    rate: currentPlan.rate,
+    renewablePercentage: 0, // Assume current plan has no renewable component
+    fees: {
+      delivery: 3.5, // Default delivery fee
+      admin: 5.0, // Default admin fee
     },
-    usageData
-  );
+    // No rateStructure - defaults to fixed rate
+  };
 
+  const currentAnnualCost = calculateAnnualCost(currentPlanMock, usageData);
   const recommendedAnnualCost = calculateAnnualCost(recommendedPlan, usageData);
 
   return Math.round((currentAnnualCost - recommendedAnnualCost) * 100) / 100;
@@ -152,6 +315,7 @@ export function generateExplanation(
 ): string {
   const parts: string[] = [];
 
+  // Cost savings explanation
   if (plan.savings > 0) {
     parts.push(`Save $${plan.savings.toFixed(2)} per year`);
   } else if (plan.savings < 0) {
@@ -160,12 +324,32 @@ export function generateExplanation(
     parts.push('Similar cost to your current plan');
   }
 
+  // Rate structure explanation
+  if (plan.rateStructure) {
+    switch (plan.rateStructure.type) {
+      case 'tiered':
+        parts.push('Tiered pricing - lower rates for lower usage');
+        break;
+      case 'tou':
+        parts.push('Time-of-use pricing - lower rates during off-peak hours');
+        break;
+      case 'variable':
+        parts.push('Variable pricing - rates may change with market conditions');
+        break;
+      case 'seasonal':
+        parts.push('Seasonal pricing - different rates for summer and winter');
+        break;
+    }
+  }
+
+  // Renewable energy explanation
   if (plan.renewablePercentage === 100) {
     parts.push('100% renewable energy');
   } else if (plan.renewablePercentage >= 50) {
     parts.push(`${plan.renewablePercentage}% renewable energy`);
   }
 
+  // Preference-based explanation
   if (preferences.costPriority > preferences.renewablePriority) {
     parts.push('Great value for cost-conscious customers');
   } else if (preferences.renewablePriority > preferences.costPriority) {
