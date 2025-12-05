@@ -46,12 +46,6 @@ interface XMLEntry {
 export function parseGreenButtonXML(xmlContent: string): ParsedUsageData {
   const parser = new XMLParser({
     ignoreAttributes: true, // Ignore XML attributes for simplicity
-    parseNodeValue: true,
-    parseAttributeValue: false,
-    trimValues: true,
-    parseTrueNumberOnly: true,
-    // Don't ignore namespaces initially to see the structure
-    ignoreNameSpace: false,
   });
 
   let xmlObj: any;
@@ -206,10 +200,6 @@ export function validateXMLFile(file: File): Promise<boolean> {
         const content = e.target?.result as string;
         const parser = new XMLParser({
           ignoreAttributes: false,
-          parseNodeValue: true,
-          parseAttributeValue: true,
-          trimValues: true,
-          parseTrueNumberOnly: true,
         });
 
         // Try to parse the XML - if it fails, it's invalid
