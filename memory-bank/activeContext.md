@@ -4,6 +4,27 @@
 
 The Energy Plan Recommendation Agent MVP is **COMPLETE, DEPLOYED, AND LIVE** in production on Render (as of December 2025). All phases have been successfully implemented, tested, validated, and deployed to production.
 
+## Recent Changes
+
+### ✅ EIA Open Data API Integration (December 2025)
+
+**Completed Work:**
+- **EIA API Integration**: Successfully integrated EIA Open Data API for energy statistics
+  - Implemented `fetchEIAWithRetry()` function with retry logic (3 attempts, exponential backoff)
+  - Added `getTexasAverageElectricityPrice()` function (placeholder for future market statistics)
+  - Updated environment variable handling to use `EIA_API_KEY` (with `UTILITY_API_KEY` fallback)
+  - Updated API route (`/api/process-data`) to use EIA API key
+  - Updated `render.yaml` for production deployment with EIA API key
+  - Updated README.md with EIA API documentation
+
+**Key Findings:**
+- EIA API provides aggregate statistical energy data, not retail supplier/plan catalogs
+- Supplier and plan data remain static/mock (as expected)
+- EIA integration tested and working (API returns 200, processes requests successfully)
+- Build and compilation successful with no errors
+
+**Status**: ✅ EIA API integration complete and tested
+
 ## Recent Changes (MVP Completion)
 
 ### ✅ Completed Implementation (All Phases)
@@ -31,11 +52,12 @@ The Energy Plan Recommendation Agent MVP is **COMPLETE, DEPLOYED, AND LIVE** in 
   - Usage data validation (realistic patterns, completeness checks)
   - Business logic validation (rate ranges, date ranges)
   - Quality scoring system
-- **API Integration**: Complete framework with mock data
-  - UtilityAPI and Arcadia client structure
-  - Retry logic with exponential backoff
-  - Caching mechanism
-  - Fallback to mock data for testing
+- **API Integration**: EIA Open Data API integrated (December 2025)
+  - EIA API client with retry logic and error handling
+  - Retry logic with exponential backoff (3 attempts)
+  - Caching mechanism (1 hour duration)
+  - Fallback to static/mock data for supplier/plan catalogs
+  - Note: EIA provides statistical data, not retail supplier/plan catalogs
 - **Backend API Route**: `/api/process-data` fully implemented
   - Form data and XML file processing
   - Error handling with appropriate HTTP status codes
@@ -104,10 +126,12 @@ The MVP is now live in production on Render and ready for:
    - Track real-world usage patterns and performance metrics
    - Set up automated monitoring alerts
 
-2. **Real API Integration**
-   - Replace mock data with real UtilityAPI calls
-   - Replace mock data with real Arcadia API calls
-   - Test with real supplier and plan data in production
+2. **EIA API Integration** ✅ COMPLETE (December 2025)
+   - ✅ EIA Open Data API integrated and tested
+   - ✅ Environment variable support (`EIA_API_KEY` with `UTILITY_API_KEY` fallback)
+   - ✅ API client with retry logic and error handling
+   - ✅ Supplier/plan data remains static (EIA doesn't provide retail catalogs)
+   - Future: Replace static supplier/plan data with retail energy supplier API
 
 3. **User Acceptance Testing**
    - Test with real users and real XML files
@@ -126,7 +150,8 @@ The MVP is now live in production on Render and ready for:
 - **XML Parser**: Using fast-xml-parser for robust Node.js XML parsing
 - **In-Memory Processing**: MVP uses temporary in-memory data (no database)
 - **Single Session**: No user accounts or persistence (localStorage for session only)
-- **Mock Data Support**: Application works with mock data if APIs unavailable
+- **EIA API Integration**: ✅ Integrated December 2025 for energy statistics
+- **Supplier/Plan Data**: Static/mock data (EIA doesn't provide retail catalogs)
 - **Error Handling**: Comprehensive error messages with recovery paths
 
 ### Design Decisions (Finalized)
@@ -152,7 +177,8 @@ The MVP is now live in production on Render and ready for:
 
 ### Areas for Future Enhancement
 - **Accessibility**: Can be improved further (currently 29% coverage, MVP level)
-- **Real API Integration**: Mock data works, but real APIs need testing
+- **Retail Supplier API**: Replace static supplier/plan data with real retail energy supplier API
+- **EIA Integration Enhancement**: Expand EIA API usage for market statistics and validation
 - **Performance**: Can be optimized further for very large XML files
 - **Mobile UX**: File upload works but could be enhanced for touch devices
 

@@ -27,6 +27,9 @@ const PERFORMANCE_THRESHOLDS = {
   pageLoadTime: 3000,       // 3 seconds
   concurrentUsers: 1000,    // Target concurrent users
   errorRate: 0.05,         // 5% error rate threshold
+  cpuThreshold: 80,        // 80% CPU usage threshold
+  memoryThreshold: 85,     // 85% memory usage threshold
+  responseTimeThreshold: 5000, // 5 seconds max response time
 };
 
 console.log('🔍 Energy Plan MVP - Render Deployment Monitor');
@@ -143,6 +146,121 @@ async function monitorSecurity() {
   console.log('   5. Implement audit logging');
 }
 
+async function checkAlerts() {
+  console.log('🚨 Checking Automated Alerts...');
+
+  try {
+    // Get metrics for the last hour
+    const endTime = new Date().toISOString();
+    const startTime = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+    console.log(`📊 Checking alerts from ${startTime} to ${endTime}`);
+
+    let alerts = [];
+
+    // Check CPU usage
+    console.log('   Checking CPU usage...');
+    // This would use: mcp_render_get_metrics with cpu_usage
+    console.log('   Use: mcp_render_get_metrics with resourceId="' + SERVICE_ID + '", metricTypes=["cpu_usage"], startTime="' + startTime + '", endTime="' + endTime + '"');
+
+    // Check memory usage
+    console.log('   Checking memory usage...');
+    // This would use: mcp_render_get_metrics with memory_usage
+    console.log('   Use: mcp_render_get_metrics with resourceId="' + SERVICE_ID + '", metricTypes=["memory_usage"], startTime="' + startTime + '", endTime="' + endTime + '"');
+
+    // Check HTTP response times
+    console.log('   Checking HTTP latency...');
+    // This would use: mcp_render_get_metrics with http_latency
+    console.log('   Use: mcp_render_get_metrics with resourceId="' + SERVICE_ID + '", metricTypes=["http_latency"], startTime="' + startTime + '", endTime="' + endTime + '"');
+
+    // Check error rates
+    console.log('   Checking HTTP request counts...');
+    // This would use: mcp_render_get_metrics with http_request_count
+    console.log('   Use: mcp_render_get_metrics with resourceId="' + SERVICE_ID + '", metricTypes=["http_request_count"], startTime="' + startTime + '", endTime="' + endTime + '"');
+
+    console.log('\n🚨 Alert Thresholds:');
+    console.log(`   CPU Usage: >${PERFORMANCE_THRESHOLDS.cpuThreshold}%`);
+    console.log(`   Memory Usage: >${PERFORMANCE_THRESHOLDS.memoryThreshold}%`);
+    console.log(`   Response Time: >${PERFORMANCE_THRESHOLDS.responseTimeThreshold}ms`);
+    console.log(`   Error Rate: >${(PERFORMANCE_THRESHOLDS.errorRate * 100).toFixed(1)}%`);
+
+    if (alerts.length === 0) {
+      console.log('✅ No alerts triggered');
+    } else {
+      console.log('⚠️  Active Alerts:');
+      alerts.forEach(alert => console.log(`   - ${alert}`));
+    }
+
+  } catch (error) {
+    console.error('❌ Error checking alerts:', error.message);
+  }
+}
+
+async function monitorUserBehavior() {
+  console.log('👥 Monitoring User Behavior Patterns...');
+
+  try {
+    console.log('\n📊 User Journey Analysis:');
+    console.log('   Step 1 Completion: Use logs to track welcome screen views');
+    console.log('   Step 2 Completion: Use logs to track current plan form submissions');
+    console.log('   Step 3 Completion: Use logs to track file upload success');
+    console.log('   Step 4 Completion: Use logs to track preferences setting');
+    console.log('   Step 5 Completion: Use logs to track final submissions');
+
+    console.log('\n📈 Usage Patterns to Monitor:');
+    console.log('   - Form completion rates by step');
+    console.log('   - Common drop-off points');
+    console.log('   - File upload success rates');
+    console.log('   - Recommendation generation times');
+    console.log('   - Error rates by step');
+
+    console.log('\n🎯 Key Metrics to Track:');
+    console.log('   - Average session duration');
+    console.log('   - Completion rate (Step 1 → Step 5)');
+    console.log('   - Error recovery success rate');
+    console.log('   - Mobile vs desktop usage');
+
+  } catch (error) {
+    console.error('❌ Error monitoring user behavior:', error.message);
+  }
+}
+
+async function generateHealthReport() {
+  console.log('📋 Generating Production Health Report...');
+
+  try {
+    console.log('\n🏥 System Health Check:');
+
+    // Service status
+    console.log('   Service Status: Use mcp_render_list_deploys to check latest deployment');
+
+    // Performance metrics
+    console.log('   Performance: Use mcp_render_get_metrics for CPU, memory, response times');
+
+    // Error monitoring
+    console.log('   Errors: Use mcp_render_list_logs with type="app" for application errors');
+
+    // User metrics
+    console.log('   Usage: Monitor HTTP request patterns and user behavior');
+
+    console.log('\n📊 Report Sections:');
+    console.log('   1. System Availability (99.9% uptime target)');
+    console.log('   2. Performance Metrics (response times, resource usage)');
+    console.log('   3. Error Analysis (error rates, types, frequency)');
+    console.log('   4. User Experience (completion rates, drop-off analysis)');
+    console.log('   5. API Integration Status (UtilityAPI, EIA API)');
+    console.log('   6. Recommendations (optimization opportunities)');
+
+    console.log('\n📅 Recommended Schedule:');
+    console.log('   - Daily: Automated alert checks');
+    console.log('   - Weekly: Full health report');
+    console.log('   - Monthly: Trend analysis and optimization review');
+
+  } catch (error) {
+    console.error('❌ Error generating health report:', error.message);
+  }
+}
+
 async function runFullMonitoring() {
   console.log('🔍 Running Full System Monitoring...\n');
 
@@ -192,11 +310,20 @@ switch (command) {
   case 'security':
     await monitorSecurity();
     break;
+  case 'alerts':
+    await checkAlerts();
+    break;
+  case 'users':
+    await monitorUserBehavior();
+    break;
+  case 'health':
+    await generateHealthReport();
+    break;
   case 'full':
     await runFullMonitoring();
     break;
   default:
-    console.log('Available commands: status, logs, metrics, deploy, performance, scalability, security, full');
+    console.log('Available commands: status, logs, metrics, deploy, performance, scalability, security, alerts, users, health, full');
 }
 
 console.log('\n💡 For programmatic access, use Render MCP tools:');

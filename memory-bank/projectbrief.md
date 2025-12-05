@@ -82,7 +82,7 @@ The **AI Energy Plan Recommendation Agent MVP** is a single-page web application
 - **Hosting**: Render web service
 - **File Size**: Maximum 10MB XML files
 - **Data Requirements**: Minimum 6 months of usage data required
-- **API Dependencies**: UtilityAPI and Arcadia API (with mock fallback)
+- **API Dependencies**: EIA Open Data API (integrated December 2025), static supplier/plan data (EIA doesn't provide retail catalogs)
 
 ## Future Roadmap
 

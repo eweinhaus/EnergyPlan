@@ -43,11 +43,12 @@
   - Weighted scoring algorithm (cost + renewable preferences)
   - Diversity selection for varied recommendations
   - Explanation generation
-- **API Clients**: Integration framework (`lib/apiClients.ts`)
-  - UtilityAPI and Arcadia client structure
-  - Retry logic with exponential backoff
-  - Caching mechanism
-  - Mock data fallback for testing
+- **API Clients**: EIA Open Data API integration (`lib/apiClients.ts`)
+  - ✅ EIA API client with retry logic and error handling (integrated December 2025)
+  - Retry logic with exponential backoff (3 attempts)
+  - Caching mechanism (1 hour duration)
+  - Static supplier/plan data (EIA doesn't provide retail catalogs)
+  - Fallback to mock data for testing
 
 #### Recommendations Display - COMPLETE
 - **RecommendationCard**: Component for individual recommendations with:
@@ -105,7 +106,8 @@
 - [ ] **Database Integration**: PostgreSQL for user data and usage history
 - [ ] **Multi-State Support**: NY, IL, PA market expansion
 - [ ] **Advanced Rate Structures**: Tiered, TOU, variable rates
-- [ ] **Real API Integration**: Replace mock data with real UtilityAPI/Arcadia calls
+- [x] **EIA API Integration**: ✅ EIA Open Data API integrated (December 2025)
+- [ ] **Retail Supplier API**: Replace static supplier/plan data with real retail energy supplier API
 - [ ] **Advanced Analytics**: Usage pattern analysis and insights
 
 #### Phase 3 Features
@@ -167,7 +169,8 @@
 - **Accessibility**: Can be improved further (currently 29% coverage, MVP level)
 - **Performance**: Can be optimized further for very large XML files
 - **Mobile UX**: File upload works but could be enhanced for touch devices
-- **Real API Integration**: Mock data works, but real APIs need testing
+- **EIA API Integration**: ✅ EIA Open Data API integrated and tested (December 2025)
+- **Retail Supplier API**: Static supplier/plan data works, but real retail supplier API needed for Phase 2
 
 ## Next Priorities
 
@@ -209,9 +212,10 @@
 ### ✅ No Current Blockers
 
 ### Dependencies (Ready for Production)
-- **API Access**: UtilityAPI and Arcadia API credentials (can use mock data for testing)
+- **API Access**: ✅ EIA API key configured (can use static data if unavailable)
 - **Test Data**: Sample Green Button XML files available ✅
 - **Deployment**: Render account and configuration ready ✅
+- **Supplier/Plan Data**: Currently static (EIA doesn't provide retail catalogs)
 
 ## MVP Completion Summary
 

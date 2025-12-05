@@ -8,14 +8,17 @@ User Browser → Next.js Frontend → Next.js API Routes → In-Memory Processin
                                                       ↓
                                     XML Parser (fast-xml-parser) → Recommendation Engine
                                                       ↓
-                                    Background Sync → UtilityAPI / Arcadia API (Mock for MVP)
+                                    Background Sync → EIA Open Data API (Statistical Data)
+                                                      ↓
+                                    Static Supplier/Plan Data (EIA doesn't provide retail catalogs)
 ```
 
 ### Component Structure
 - **Frontend**: Single-page React application with progressive form steps
 - **Backend**: Next.js API routes for data processing
 - **Processing**: In-memory Node.js processing (no database for MVP)
-- **External APIs**: UtilityAPI and Arcadia for supplier data (mock data for MVP)
+- **External APIs**: EIA Open Data API for energy statistics (integrated December 2025)
+- **Supplier/Plan Data**: Static/mock data (EIA doesn't provide retail supplier catalogs)
 
 ## Key Technical Decisions
 
@@ -154,10 +157,12 @@ score = costScore + renewableScore + supplierScore
 ```
 
 ### API Integration Pattern
+- **EIA API Integration**: ✅ Implemented with retry logic and error handling
 - **Retry Logic**: 3 attempts with exponential backoff
 - **Caching**: Background sync with in-memory cache (1 hour duration)
-- **Fallback**: Mock data if APIs unavailable (MVP default)
+- **Fallback**: Mock/static data if APIs unavailable (MVP default)
 - **Error Handling**: Clear error messages for users
+- **Data Source**: EIA provides statistical data; supplier/plan data is static
 
 ### Diversity Selection Pattern
 ```typescript
@@ -177,7 +182,8 @@ score = costScore + renewableScore + supplierScore
 - In-memory processing (no persistence)
 - Synchronous processing
 - Limited concurrent users
-- Mock API data (not real-time)
+- Static supplier/plan data (EIA doesn't provide retail catalogs)
+- EIA API integrated but used for statistical data only
 
 ### Future Architecture (Post-MVP)
 - **Service Separation**: Background workers for heavy processing
@@ -185,7 +191,8 @@ score = costScore + renewableScore + supplierScore
 - **Caching**: Redis for frequently accessed data
 - **Async Processing**: Queue-based job processing
 - **Horizontal Scaling**: Multiple server instances with load balancing
-- **Real API Integration**: Replace mock data with real API calls
+- **Retail Supplier API**: Replace static supplier/plan data with real retail energy supplier API
+- **EIA Integration Enhancement**: Expand EIA API usage for market context and validation
 
 ## Security & Privacy Patterns
 

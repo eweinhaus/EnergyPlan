@@ -55,17 +55,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Get API keys from environment
-    // EIA API key is used for energy statistics (EIA doesn't provide retail supplier/plan catalogs)
-    const eiaApiKey = process.env.EIA_API_KEY || process.env.UTILITY_API_KEY || '';
-    
-    // Note: EIA API provides statistical data, not retail supplier/plan catalogs
-    // Supplier and plan data are currently static/mock data
-    // In the future, this could be replaced with a retail supplier/plan API
+    // EIA API key is used for energy statistics
+    const eiaApiKey = process.env.EIA_API_KEY || '';
 
-    // Get available plans (currently static data)
+    // UtilityAPI key is used for real retail supplier/plan data
+    const utilityApiKey = process.env.UTILITY_API_KEY || '';
+
+    // Use UtilityAPI key for supplier/plan data, fallback to EIA key or empty string
+    const apiKey = utilityApiKey || eiaApiKey;
+
+    // Get available plans (now uses UtilityAPI with fallback to mock data)
     let plans;
     try {
-      plans = await getPlans(eiaApiKey);
+      plans = await getPlans(apiKey);
     } catch (error) {
       console.error('Error fetching plans:', error);
       return NextResponse.json(

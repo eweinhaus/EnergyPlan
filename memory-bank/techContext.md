@@ -54,11 +54,14 @@ npm run dev
 ```env
 # .env.local
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-UTILITY_API_KEY=your_utility_api_key_here  # Optional for MVP
-ARCADIA_API_KEY=your_arcadia_api_key_here  # Optional for MVP
+EIA_API_KEY=your_eia_api_key_here  # EIA Open Data API key (get from https://www.eia.gov/opendata/register.php)
+# Legacy support: UTILITY_API_KEY can be used as fallback if EIA_API_KEY is not set
 ```
 
-**Note**: For MVP testing, the application uses mock data if API keys are not provided.
+**Note**: 
+- EIA API provides statistical energy data (not retail supplier/plan catalogs)
+- Supplier and plan data are currently static/mock data
+- For MVP testing, the application uses mock data if API keys are not provided
 
 ## Project Structure
 
@@ -154,9 +157,10 @@ EnergyPlan/
 - **Memory**: Efficient processing for large XML files (<50MB estimated)
 
 ### API Constraints
-- **Rate Limits**: UtilityAPI and Arcadia API rate limits (handled with caching)
+- **Rate Limits**: EIA API rate limits (handled with caching and retry logic)
 - **Timeout**: API calls timeout after reasonable duration
 - **Fallback**: Mock data used if APIs unavailable (MVP default)
+- **EIA API**: Provides statistical data only, not retail supplier/plan catalogs
 
 ### Data Constraints
 - **Minimum Data**: 6 months of usage data required
@@ -204,19 +208,21 @@ node monitor-deployment.js [command]
 
 ## External Integrations
 
-### UtilityAPI
-- **Purpose**: Texas supplier data and utility information
-- **Authentication**: API key via environment variable
-- **Endpoint**: GET /api/utility-data/texas-suppliers
-- **Response**: Supplier catalog with ratings
-- **Status**: Framework ready, uses mock data for MVP
+### EIA Open Data API
+- **Purpose**: U.S. Energy Information Administration statistical energy data
+- **Authentication**: API key via environment variable (`EIA_API_KEY`)
+- **Base URL**: `https://api.eia.gov/v2`
+- **Documentation**: https://www.eia.gov/opendata/
+- **Registration**: https://www.eia.gov/opendata/register.php
+- **Status**: ✅ Integrated and tested (December 2025)
+- **Note**: EIA provides aggregate statistical data, not retail supplier/plan catalogs
+- **Implementation**: `lib/apiClients.ts` includes `fetchEIAWithRetry()` and `getTexasAverageElectricityPrice()` functions
 
-### Arcadia API
-- **Purpose**: Energy plan catalog data
-- **Authentication**: API key via environment variable
-- **Endpoint**: GET /api/arcadia/plans
-- **Response**: Plan details with rates and renewable percentages
-- **Status**: Framework ready, uses mock data for MVP
+### Supplier & Plan Data
+- **Current Status**: Static/mock data (EIA doesn't provide retail supplier catalogs)
+- **Location**: Defined in `lib/apiClients.ts`
+- **Rationale**: EIA API provides statistical data, not individual retail energy supplier/plan information
+- **Future**: Could be replaced with retail supplier API or database in Phase 2
 
 ### Mock Data
 - **Fallback**: Used when APIs unavailable or for testing
@@ -299,7 +305,8 @@ node monitor-deployment.js [command]
 - **Caching**: Redis for frequently accessed data
 - **Background Jobs**: Queue-based processing (Bull/BullMQ)
 - **Testing**: Jest unit tests, Playwright E2E tests
-- **Real API Integration**: Replace mock data with real API calls
+- **Retail Supplier API**: Replace static supplier/plan data with real retail energy supplier API
+- **EIA Integration Enhancement**: Expand EIA API usage for market statistics and validation
 
 ### Phase 3 (Advanced)
 - **Microservices**: Separate services for processing

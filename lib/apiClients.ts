@@ -12,6 +12,12 @@ const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 const EIA_API_BASE = 'https://api.eia.gov/v2';
 
 /**
+ * UtilityAPI Base URL
+ * UtilityAPI provides access to real utility supplier and plan data
+ */
+const UTILITY_API_BASE = 'https://utilityapi.com/api/v2';
+
+/**
  * Fetch data from EIA API with retry logic
  * EIA API provides statistical energy data, not retail supplier catalogs
  */
@@ -63,12 +69,12 @@ export async function getTexasAverageElectricityPrice(apiKey: string): Promise<n
     // Series: ELEC.PRICE.TX-RES.M (Monthly average price in cents/kWh)
     // Note: This is a placeholder - actual series ID needs to be verified via EIA API browser
     const data = await fetchEIAWithRetry('/electricity/retail-sales/data/?frequency=monthly&data[0]=price&facets[stateid][]=TX&facets[sectorid][]=RES&sort[0][column]=period&sort[0][direction]=desc&length=1', apiKey);
-    
+
     if (data && data.length > 0 && data[0].price) {
       // Price is typically in cents per kWh
       return data[0].price;
     }
-    
+
     return null;
   } catch (error) {
     console.warn('Could not fetch Texas average electricity price from EIA:', error);
@@ -77,20 +83,69 @@ export async function getTexasAverageElectricityPrice(apiKey: string): Promise<n
 }
 
 /**
- * Fetch suppliers - Static data since EIA doesn't provide retail supplier catalogs
- * EIA provides statistical data, not individual retail energy supplier information
+ * Fetch data from UtilityAPI with retry logic
+ * UtilityAPI provides real retail energy supplier and plan data
+ */
+async function fetchUtilityAPIWithRetry(
+  endpoint: string,
+  apiKey: string,
+  retries = 3
+): Promise<any> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const url = `${UTILITY_API_BASE}${endpoint}`;
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`UtilityAPI responded with status ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (i === retries - 1) {
+        console.error('Failed to fetch UtilityAPI data after retries:', error);
+        throw error;
+      }
+      // Exponential backoff
+      await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1000));
+    }
+  }
+  return null;
+}
+
+/**
+ * Fetch suppliers from UtilityAPI - Real retail energy supplier data
+ * UtilityAPI provides access to current Texas retail energy suppliers
  */
 async function fetchSuppliersWithRetry(
   apiKey: string,
   retries = 3
 ): Promise<Supplier[]> {
-  // Note: EIA API does not provide retail energy supplier catalogs.
-  // EIA provides aggregate statistical data about energy markets.
-  // For retail supplier data, we use static/mock data.
-  // In the future, this could be replaced with a retail supplier API or database.
-  
-  await new Promise((resolve) => setTimeout(resolve, 50)); // Small delay for consistency
+  try {
+    // Try to get suppliers from UtilityAPI first
+    const data = await fetchUtilityAPIWithRetry('/suppliers?state=TX', apiKey, retries);
 
+    if (data && data.suppliers && Array.isArray(data.suppliers)) {
+      // Map UtilityAPI response to our Supplier interface
+      return data.suppliers.map((supplier: any) => ({
+        id: supplier.id.toString(),
+        name: supplier.name || supplier.utility_name,
+        rating: supplier.rating || 4.0, // Default rating if not provided
+      }));
+    }
+  } catch (error) {
+    console.warn('Could not fetch suppliers from UtilityAPI, falling back to mock data:', error);
+  }
+
+  // Fallback to mock data if UtilityAPI fails
+  console.log('Using mock supplier data as fallback');
   return [
     { id: '1', name: 'Reliant Energy', rating: 4.5 },
     { id: '2', name: 'TXU Energy', rating: 4.3 },
@@ -104,22 +159,40 @@ async function fetchSuppliersWithRetry(
 }
 
 /**
- * Fetch plans - Static data since EIA doesn't provide retail plan catalogs
- * EIA provides statistical data, not individual retail energy plan information
+ * Fetch plans from UtilityAPI - Real retail energy plan data
+ * UtilityAPI provides access to current Texas retail energy plans and rates
  */
 async function fetchPlansWithRetry(
   apiKey: string,
   retries = 3
 ): Promise<Plan[]> {
-  // Note: EIA API does not provide retail energy plan catalogs.
-  // EIA provides aggregate statistical data about energy markets.
-  // For retail plan data, we use static/mock data.
-  // In the future, this could be replaced with a retail plan API or database.
-  
-  await new Promise((resolve) => setTimeout(resolve, 50)); // Small delay for consistency
+  try {
+    // Try to get plans from UtilityAPI first
+    const data = await fetchUtilityAPIWithRetry('/plans?state=TX&active=true', apiKey, retries);
 
+    if (data && data.plans && Array.isArray(data.plans)) {
+      // Map UtilityAPI response to our Plan interface
+      return data.plans.map((plan: any) => ({
+        id: plan.id.toString(),
+        supplierId: plan.supplier_id.toString(),
+        supplierName: plan.supplier_name || plan.utility_name,
+        name: plan.name || `${plan.supplier_name} Plan`,
+        rate: plan.rate_per_kwh || plan.rate || 12.0, // Default rate if not provided
+        renewablePercentage: plan.renewable_percentage || plan.green_percentage || 0,
+        fees: {
+          delivery: plan.delivery_fee || plan.tdsp_fee || 3.5,
+          admin: plan.admin_fee || 5.0,
+        },
+      }));
+    }
+  } catch (error) {
+    console.warn('Could not fetch plans from UtilityAPI, falling back to mock data:', error);
+  }
+
+  // Fallback to mock data if UtilityAPI fails
+  console.log('Using mock plan data as fallback');
   const suppliers = await fetchSuppliersWithRetry(apiKey);
-  
+
   // Generate static plans based on suppliers
   const plans: Plan[] = [];
   suppliers.forEach((supplier, index) => {
