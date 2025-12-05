@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { Step1Welcome } from '../components/form/Step1Welcome';
-import { Step2CurrentPlan } from '../components/form/Step2CurrentPlan';
-import { Step3FileUpload } from '../components/form/Step3FileUpload';
-import { Step4Preferences } from '../components/form/Step4Preferences';
-import { Step5Review } from '../components/form/Step5Review';
-import { RecommendationList } from '../components/recommendations/RecommendationList';
-import { EnergyPlanFormData, Recommendation } from '../lib/types';
+import { Step1Welcome } from '@/components/form/Step1Welcome';
+import { Step2CurrentPlan } from '@/components/form/Step2CurrentPlan';
+import { Step3FileUpload } from '@/components/form/Step3FileUpload';
+import { Step4Preferences } from '@/components/form/Step4Preferences';
+import { Step5Review } from '@/components/form/Step5Review';
+import { RecommendationList } from '@/components/recommendations/RecommendationList';
+import { EnergyPlanFormData, Recommendation } from '@/lib/types';
 
 const TOTAL_STEPS = 5;
 

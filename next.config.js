@@ -6,8 +6,11 @@ const nextConfig = {
     esmExternals: 'loose',
   },
   webpack: (config) => {
-    // Ensure proper path resolution
-    config.resolve.modules = ['node_modules', '.']
+    // Ensure proper path resolution for @ alias
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, '.'),
+    }
     return config
   },
 }
