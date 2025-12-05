@@ -1,0 +1,266 @@
+%% Energy Plan Recommendation Agent - Architecture Diagrams
+%% This file contains all system architecture diagrams in Mermaid format
+
+%% ===========================================
+%% SYSTEM OVERVIEW
+%% ===========================================
+
+graph TB
+    A[User Browser] --> B[Next.js Frontend]
+    B --> C[Next.js API Routes]
+
+    C --> D[In-Memory Processing]
+    C --> E[Background Data Sync]
+
+    E --> F[UtilityAPI]
+    E --> G[Arcadia API]
+
+    D --> H[XML Parser]
+    D --> I[Recommendation Engine]
+
+    H --> J[Usage Aggregation]
+    I --> K[Rules-Based Scoring]
+    I --> L[Fixed Rate Projections]
+
+    B --> M[Results Display]
+
+    style A fill:#e1f5fe
+    style B fill:#c8e6c9
+    style C fill:#ffecb3
+    style M fill:#f3e5f5
+
+%% ===========================================
+%% DATA FLOW SEQUENCE
+%% ===========================================
+
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant A as API
+    participant P as Processor
+
+    U->>F: Upload XML + fill form
+    F->>A: Submit all data
+    A->>P: Process XML & form data
+    P->>P: Validate & aggregate usage
+    P->>P: Fetch supplier data (cached)
+    P->>P: Calculate recommendations
+    P->>A: Return top 3 recommendations
+    A->>F: Display results
+    F->>U: Show recommendations
+
+%% ===========================================
+%% DEPLOYMENT ARCHITECTURE (RENDER)
+%% ===========================================
+
+graph TB
+    subgraph "Render Web Service"
+        W[Next.js App<br/>Frontend + API + Processing]
+        C[In-Memory Cache<br/>Supplier Data]
+        B[Background Sync<br/>API Data Fetching]
+    end
+
+    U[Users] --> W
+    W --> C
+    B --> API1[UtilityAPI]
+    B --> API2[Arcadia]
+
+    style W fill:#e8f5e8
+    style C fill:#e3f2fd
+    style B fill:#fff3e0
+
+%% ===========================================
+%% COMPONENT ARCHITECTURE DETAILS
+%% ===========================================
+
+graph TD
+    subgraph "Frontend Layer"
+        FE1[Next.js App]
+        FE2[Progressive Form<br/>5 Steps]
+        FE3[File Upload<br/>Green Button XML]
+        FE4[Results Display<br/>Recommendation Cards]
+        FE5[State Management<br/>React State]
+    end
+
+    subgraph "API Layer"
+        API1[Next.js API Routes]
+        API2[Data Processing<br/>POST /api/process-data]
+        API3[Recommendations<br/>GET /api/recommendations]
+        API4[Validation<br/>Input Sanitization]
+    end
+
+    subgraph "Processing Layer"
+        P1[Node.js Processing]
+        P2[XML Parser<br/>Green Button ESPI]
+        P3[Data Aggregation<br/>Hourly → Monthly]
+        P4[Cost Calculator<br/>Fixed Rates]
+        P5[Recommendation Engine<br/>Rules-Based Scoring]
+    end
+
+    subgraph "Data Layer (MVP)"
+        DB1[In-Memory Cache]
+        DB2[Supplier Data]
+        DB3[Session Data]
+        DB4[Processing Results]
+    end
+
+    FE1 --> API1
+    API1 --> P1
+    P1 --> DB1
+
+%% ===========================================
+%% API ENDPOINTS FLOW
+%% ===========================================
+
+flowchart TD
+    Start([User Starts Form]) --> Step1[Step 1: Welcome]
+    Step1 --> Step2[Step 2: Current Plan]
+    Step2 --> Step3[Step 3: Usage Data Upload]
+    Step3 --> Step4[Step 4: Preferences]
+    Step4 --> Step5[Step 5: Review & Submit]
+
+    Step5 --> API1[POST /api/process-data<br/>All form + XML data]
+
+    API1 --> Process[Validate & Process<br/>XML + Form Data]
+
+    Process --> API2[GET /api/recommendations<br/>Top 3 Results]
+
+    API2 --> Results[Display Top 3<br/>Recommendations]
+
+    style Start fill:#e8f5e9
+    style Results fill:#e8f5e9
+
+%% ===========================================
+%% RECOMMENDATION ENGINE FLOW
+%% ===========================================
+
+flowchart TD
+    Input[User Data + Usage] --> Validate{Data Valid?}
+    Validate -->|No| Error[Return Error]
+    Validate -->|Yes| Aggregate[Aggregate Usage<br/>Monthly Totals]
+
+    Aggregate --> Query[Query Supplier<br/>Catalog]
+    Query --> Score[Calculate Scores<br/>For Each Plan]
+
+    Score --> Rank[Rank Plans<br/>By Total Score]
+    Rank --> Select[Select Top 3<br/>With Diversity]
+    Select --> Project[Calculate Cost<br/>Projections]
+    Project --> Explain[Generate<br/>Explanations]
+
+    Explain --> Output[Return<br/>Recommendations]
+
+    style Input fill:#e1f5fe
+    style Output fill:#c8e6c9
+
+%% ===========================================
+%% SCALING ARCHITECTURE (FUTURE)
+%% ===========================================
+
+graph TB
+    subgraph "Load Balancer"
+        LB[NGINX / Cloud Load Balancer]
+    end
+
+    subgraph "Web Services (Auto-scaling)"
+        W1[Web Service 1]
+        W2[Web Service 2]
+        W3[Web Service N]
+    end
+
+    subgraph "Background Workers (Queue-based)"
+        BW1[Worker 1<br/>Data Processing]
+        BW2[Worker 2<br/>Recommendations]
+        BW3[Worker N<br/>Analytics]
+    end
+
+    subgraph "Cache Layer"
+        Redis[(Redis Cache<br/>Supplier Data)]
+    end
+
+    subgraph "Database Cluster"
+        PG_MASTER[(PostgreSQL<br/>Primary)]
+        PG_REPLICA1[(PostgreSQL<br/>Read Replica 1)]
+        PG_REPLICA2[(PostgreSQL<br/>Read Replica 2)]
+
+        TS_MASTER[(TimescaleDB<br/>Primary)]
+        TS_REPLICA[(TimescaleDB<br/>Read Replica)]
+    end
+
+    subgraph "External APIs"
+        API1[UtilityAPI]
+        API2[Arcadia]
+        API3[EnergyBot]
+    end
+
+    U[Users] --> LB
+    LB --> W1
+    LB --> W2
+    LB --> W3
+
+    W1 --> Redis
+    W2 --> Redis
+    W3 --> Redis
+
+    W1 --> PG_MASTER
+    W1 --> TS_MASTER
+    W2 --> PG_REPLICA1
+    W2 --> TS_REPLICA
+    W3 --> PG_REPLICA2
+
+    BW1 --> Redis
+    BW2 --> Redis
+    BW3 --> Redis
+
+    BW1 --> PG_MASTER
+    BW1 --> TS_MASTER
+    BW2 --> PG_MASTER
+    BW2 --> TS_MASTER
+
+    BW1 --> API1
+    BW1 --> API2
+    BW1 --> API3
+
+%% ===========================================
+%% SECURITY ARCHITECTURE
+%% ===========================================
+
+graph TD
+    subgraph "Client Layer"
+        Client[User Browser]
+        Client --> TLS1[TLS 1.3<br/>Encrypted Connection]
+    end
+
+    subgraph "API Gateway / Load Balancer"
+        GW[API Gateway]
+        GW --> Auth[Authentication<br/>JWT / API Keys]
+        GW --> RateLimit[Rate Limiting<br/>DDoS Protection]
+        GW --> WAF[WAF<br/>Web Application Firewall]
+    end
+
+    subgraph "Application Layer"
+        App[Application Server]
+        App --> InputVal[Input Validation<br/>Sanitization]
+        App --> Encrypt[Data Encryption<br/>At Rest & In Transit]
+        App --> Audit[Audit Logging<br/>Security Events]
+    end
+
+    subgraph "Data Layer"
+        DB[(Encrypted Database)]
+        DB --> AccessCtrl[Access Controls<br/>Row Level Security]
+        DB --> Backup[Encrypted Backups<br/>Off-site Storage]
+    end
+
+    subgraph "External Integrations"
+        Ext[Third-party APIs]
+        Ext --> APIKeys[Secure API Key<br/>Management]
+        Ext --> Monitoring[API Usage<br/>Monitoring]
+    end
+
+    TLS1 --> GW
+    GW --> App
+    App --> DB
+    App --> Ext
+
+    style Client fill:#e1f5fe
+    style DB fill:#ffebee
+    style Ext fill:#fff3e0

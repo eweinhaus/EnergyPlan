@@ -1,0 +1,31 @@
+# Render deployment configuration
+# This file defines the service configuration for Render deployment
+
+services:
+  - type: web
+    name: energy-plan-mvp
+    runtime: node
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_APP_URL
+        fromSecret: app-url
+      - key: UTILITY_API_KEY
+        fromSecret: utility-api-key
+      - key: ARCADIA_API_KEY
+        fromSecret: arcadia-api-key
+    healthCheckPath: /
+    plan: starter
+    region: oregon
+    autoDeploy: true
+
+# Optional: Database service (for future use)
+# databases:
+#   - name: energy-plan-db
+#     databaseName: energy_plan
+#     user: energy_plan_user
+#     plan: starter
+#     region: oregon
+
