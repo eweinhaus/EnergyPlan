@@ -8,7 +8,6 @@ jest.mock('firebase/app');
 jest.mock('firebase/auth');
 jest.mock('firebase/firestore');
 jest.mock('@react-pdf/renderer');
-jest.mock('puppeteer');
 
 const mockFirebase = require('firebase/app');
 const mockAuth = require('firebase/auth');
@@ -229,26 +228,14 @@ describe('Phase 2 Complete User Flow Integration', () => {
       expect(result.generationTime).toBeGreaterThan(0);
     });
 
-    test('falls back to puppeteer when react-pdf fails', async () => {
+    test('handles react-pdf failure gracefully', async () => {
       const { generatePDFReport } = require('../lib/pdfGenerator');
-      const puppeteer = require('puppeteer');
 
       // Mock react-pdf failure
       const { pdf } = require('@react-pdf/renderer');
       pdf.mockImplementation(() => {
         throw new Error('React-pdf failed');
       });
-
-      // Mock puppeteer success
-      const mockBrowser = {
-        newPage: jest.fn().mockResolvedValue({
-          setContent: jest.fn(),
-          pdf: jest.fn().mockResolvedValue(Buffer.from('mock pdf')),
-          close: jest.fn(),
-        }),
-        close: jest.fn(),
-      };
-      puppeteer.default.launch.mockResolvedValue(mockBrowser);
 
       const recommendations = [];
       const formData = {
@@ -258,8 +245,8 @@ describe('Phase 2 Complete User Flow Integration', () => {
 
       const result = await generatePDFReport(recommendations, formData);
 
-      expect(result.success).toBe(true);
-      expect(puppeteer.default.launch).toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
     });
   });
 

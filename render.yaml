@@ -21,7 +21,7 @@ services:
     healthCheckPath: /
     plan: starter
     region: oregon
-    autoDeploy: true
+    autoDeploy: false
 
 # Optional: Database service (for future use)
 # databases:
