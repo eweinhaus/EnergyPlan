@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from './Card';
+import { Modal } from './Modal';
 
 interface DataProcessingTransparencyProps {
   currentStep: number;
@@ -10,7 +10,7 @@ interface DataProcessingTransparencyProps {
 export const DataProcessingTransparency: React.FC<DataProcessingTransparencyProps> = ({
   currentStep,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getStepDataInfo = (step: number) => {
     switch (step) {
@@ -103,88 +103,92 @@ export const DataProcessingTransparency: React.FC<DataProcessingTransparencyProp
   if (!stepInfo) return null;
 
   return (
-    <Card className="mt-4">
+    <>
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full text-left flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+        onClick={() => setIsModalOpen(true)}
+        className="inline-flex items-center space-x-1 text-xs text-gray-500 hover:text-gray-700 transition-colors mt-2"
+        title="View data processing transparency"
       >
-        <div className="flex items-center space-x-2">
-          <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700">Data Processing Transparency</span>
-        </div>
-        <span className="text-xs text-gray-500">
-          {isExpanded ? 'Click to collapse' : 'Click to expand'}
-        </span>
+        <svg
+          className="w-3 h-3"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <span>Data processing details</span>
       </button>
 
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-gray-200">
-          <div className="space-y-4">
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Data Processing Transparency"
+        className="sm:max-w-2xl"
+      >
+        <div className="space-y-6">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-4">{stepInfo.title}</h4>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">{stepInfo.title}</h4>
+              <h5 className="font-medium text-gray-900 mb-3">Data Collected:</h5>
+              <ul className="text-sm text-gray-600 space-y-2">
+                {stepInfo.dataCollected.map((item, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="text-primary-500 mr-2 mt-1">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h5 className="font-medium text-gray-900 mb-3">How We Process It:</h5>
+              <ul className="text-sm text-gray-600 space-y-2">
+                {stepInfo.processing.map((item, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="text-primary-500 mr-2 mt-1">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 rounded-lg p-4">
+            <h5 className="font-medium text-blue-900 mb-2">Legal Basis:</h5>
+            <p className="text-sm text-blue-800">{stepInfo.legalBasis}</p>
+          </div>
+
+          <div className="bg-green-50 rounded-lg p-4">
+            <h5 className="font-medium text-green-900 mb-2">Data Retention:</h5>
+            <p className="text-sm text-green-800">{stepInfo.retention}</p>
+          </div>
+
+          <div className="bg-yellow-50 rounded-lg p-4">
+            <div className="flex items-start space-x-3">
+              <svg className="w-5 h-5 text-yellow-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
               <div>
-                <h5 className="font-medium text-gray-900 mb-2">Data Collected:</h5>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  {stepInfo.dataCollected.map((item, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-primary-500 mr-2">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h5 className="font-medium text-gray-900 mb-2">How We Process It:</h5>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  {stepInfo.processing.map((item, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-primary-500 mr-2">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="bg-blue-50 rounded-lg p-3">
-              <h5 className="font-medium text-blue-900 mb-1">Legal Basis:</h5>
-              <p className="text-sm text-blue-800">{stepInfo.legalBasis}</p>
-            </div>
-
-            <div className="bg-green-50 rounded-lg p-3">
-              <h5 className="font-medium text-green-900 mb-1">Data Retention:</h5>
-              <p className="text-sm text-green-800">{stepInfo.retention}</p>
-            </div>
-
-            <div className="bg-yellow-50 rounded-lg p-3">
-              <div className="flex items-start space-x-2">
-                <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                <div>
-                  <h5 className="font-medium text-yellow-900">Your Rights:</h5>
-                  <p className="text-sm text-yellow-800">
-                    You can withdraw consent, request data deletion, or access your data at any time.
-                    <a href="/data-rights" className="underline ml-1">Learn more about your rights</a>
-                  </p>
-                </div>
+                <h5 className="font-medium text-yellow-900 mb-1">Your Rights:</h5>
+                <p className="text-sm text-yellow-800">
+                  You can withdraw consent, request data deletion, or access your data at any time.
+                  <a href="/data-rights" className="underline ml-1 hover:text-yellow-900">Learn more about your rights</a>
+                </p>
               </div>
             </div>
           </div>
         </div>
-      )}
-    </Card>
+      </Modal>
+    </>
   );
 };
 

@@ -38,6 +38,21 @@ export const UserStatus: React.FC = () => {
     );
   }
 
+  // Check if Firebase is configured
+  const hasFirebaseConfig = !!(
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN &&
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  );
+
+  if (!hasFirebaseConfig) {
+    return (
+      <div className="text-xs text-gray-500 max-w-xs">
+        Authentication not configured
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <>

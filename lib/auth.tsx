@@ -42,6 +42,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if Firebase environment variables are configured
+    const hasFirebaseConfig = !!(
+      process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
+      process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN &&
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    );
+
+    if (!hasFirebaseConfig) {
+      // Firebase not configured, skip auth initialization
+      console.warn('Firebase not configured - authentication disabled');
+      setLoading(false);
+      return;
+    }
+
     loadFirebaseAuth().then(() => {
       if (onAuthStateChanged) {
         const unsubscribe = onAuthStateChanged(auth, (user: any) => {
@@ -49,39 +63,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setLoading(false);
         });
         return () => unsubscribe();
+      } else {
+        // Fallback if onAuthStateChanged is not available
+        setLoading(false);
       }
+    }).catch((error) => {
+      console.error('Failed to load Firebase auth:', error);
+      setLoading(false);
     });
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    if (signInWithEmailAndPassword) {
-      await signInWithEmailAndPassword(auth, email, password);
+    if (!signInWithEmailAndPassword) {
+      throw new Error('Firebase authentication not configured');
     }
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
   const signUp = async (email: string, password: string) => {
-    if (createUserWithEmailAndPassword) {
-      await createUserWithEmailAndPassword(auth, email, password);
+    if (!createUserWithEmailAndPassword) {
+      throw new Error('Firebase authentication not configured');
     }
+    await createUserWithEmailAndPassword(auth, email, password);
   };
 
   const signInWithGoogle = async () => {
-    if (GoogleAuthProvider && signInWithPopup) {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+    if (!GoogleAuthProvider || !signInWithPopup) {
+      throw new Error('Firebase authentication not configured');
     }
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
   };
 
   const signOut = async () => {
-    if (firebaseSignOut) {
-      await firebaseSignOut(auth);
+    if (!firebaseSignOut) {
+      throw new Error('Firebase authentication not configured');
     }
+    await firebaseSignOut(auth);
   };
 
   const resetPassword = async (email: string) => {
-    if (sendPasswordResetEmail) {
-      await sendPasswordResetEmail(auth, email);
+    if (!sendPasswordResetEmail) {
+      throw new Error('Firebase authentication not configured');
     }
+    await sendPasswordResetEmail(auth, email);
   };
 
   const value: AuthContextType = {
