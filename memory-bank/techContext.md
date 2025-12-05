@@ -247,7 +247,7 @@ node monitor-deployment.js [command]
 ## Deployment
 
 ### Hosting Platform
-- **Current (MVP)**: Render web service
+- **Current (MVP)**: Vercel (migrated from Render - $0/month vs $7/month)
 - **Deployment**: Successfully deployed and live in production
 - **Configuration**: `render.yaml` file included
 - **Environment**: Production environment variables configured and active

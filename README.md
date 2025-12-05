@@ -210,3 +210,4 @@ The application is configured for deployment on Render:
 
 For issues or questions, please [create an issue](link-to-issues) in the repository.
 
+# Vercel deployment trigger
