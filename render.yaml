@@ -3,7 +3,7 @@
 
 services:
   - type: web
-    name: EnergyPlan
+    name: energy-plan-mvp
     runtime: node
     buildCommand: npm install && npm run build
     startCommand: npm start
