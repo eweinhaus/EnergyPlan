@@ -13,6 +13,8 @@ interface RecommendationListProps {
   qualityScore?: number;
   savingToAccount?: boolean;
   formData?: EnergyPlanFormData;
+  currentPlan?: CurrentPlanData;
+  usageData?: ParsedUsageData;
 }
 
 export const RecommendationList: React.FC<RecommendationListProps> = ({
@@ -21,6 +23,8 @@ export const RecommendationList: React.FC<RecommendationListProps> = ({
   qualityScore,
   savingToAccount = false,
   formData,
+  currentPlan,
+  usageData,
 }) => {
   const [generatingPDF, setGeneratingPDF] = useState(false);
 
@@ -144,6 +148,8 @@ export const RecommendationList: React.FC<RecommendationListProps> = ({
             key={recommendation.plan.id}
             recommendation={recommendation}
             rank={index + 1}
+            currentPlan={currentPlan}
+            usageData={usageData}
           />
         ))}
       </div>

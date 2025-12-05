@@ -9,6 +9,12 @@ export interface CurrentPlanData {
 export interface UserPreferences {
   costPriority: number; // 0-100
   renewablePriority: number; // 0-100, must sum to 100 with costPriority
+
+  // New preference criteria
+  supplierDiversity?: 'prefer-variety' | 'prefer-best' | 'no-preference'; // NEW
+  priceStability?: 'fixed-only' | 'variable-ok' | 'no-preference'; // NEW
+  planComplexity?: 'simple-only' | 'complex-ok' | 'no-preference'; // NEW
+  supplierReputation?: 'high-only' | 'any-ok' | 'no-preference'; // NEW
 }
 
 export interface EnergyPlanFormData {

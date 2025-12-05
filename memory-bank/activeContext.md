@@ -6,6 +6,43 @@ The Energy Plan Recommendation Agent MVP is **COMPLETE, DEPLOYED, AND LIVE** in 
 
 ## Recent Changes
 
+### ✅ Fixed Diversity Criteria & Enhanced User Preferences (December 2025)
+
+**Problem Addressed:**
+- Diversity criteria were overriding explicit user preferences for cost savings vs renewable energy
+- Users couldn't control additional preference factors beyond the basic cost/renewable balance
+
+**Changes Implemented:**
+- **Removed Diversity Logic**: Simplified `selectTopRecommendations()` to return top 3 highest-scoring plans without forced supplier/price/renewable variety constraints
+- **Expanded User Preferences**: Added optional preference questions for:
+  - Price Stability (fixed vs variable rates)
+  - Plan Complexity (simple vs complex rate structures)
+  - Supplier Reputation (highly-rated suppliers preference)
+- **Enhanced Scoring Algorithm**: Modified `calculatePlanScore()` to incorporate new preferences with appropriate weightings (0.02-0.05 additional score range)
+- **Updated UI**: Enhanced Step4Preferences component with additional radio button questions for the new preferences
+- **Detailed Plan Modal**: Added comprehensive `PlanDetailsModal` component with:
+  - Complete rate structure visualization (tiers, time-of-use, seasonal rates)
+  - Monthly cost breakdowns (when usage data available)
+  - Supplier reputation and rating display
+  - Plan benefits and feature highlights
+  - Clickable recommendation cards that open detailed modals
+
+**Key Benefits:**
+- Recommendations now prioritize user preferences over forced diversity
+- Users have more control over what matters to them
+- Optional additional preferences don't overwhelm the interface
+- Scoring algorithm remains transparent and preference-driven
+
+**Testing Results:**
+- Integration tests pass - recommendations properly reflect user preferences
+- TypeScript compilation successful with no errors
+- Form validation and state management working correctly
+
+**Next Steps:**
+- Deploy via Vercel GitHub integration (automatic)
+- Monitor user feedback on improved preference matching
+- Consider A/B testing with/without additional preference questions
+
 ### ✅ EIA Open Data API Integration (December 2025)
 
 **Completed Work:**
@@ -206,6 +243,7 @@ The MVP is now live in production on Render and ready for:
 - **Form Validation**: Working correctly with proper error messages
 - **Type Conflicts**: FormData type renamed to EnergyPlanFormData to avoid conflicts
 - **Build Errors**: All TypeScript compilation errors resolved
+- **Authentication Error**: Removed UserStatus component from MVP since authentication is out of scope ✅
 - **Auth Loading Issue**: Fixed infinite "Loading..." state in top right when Firebase not configured
 - **Firebase Configuration**: Production setup script completed successfully, Firebase environment variables configured
 - **Firebase Deployment**: Successfully deployed to Firebase Hosting at https://energy-plan-7fdcc.web.app

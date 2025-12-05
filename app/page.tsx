@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { ConsentBanner, ConsentState } from '@/components/ui/ConsentBanner';
 import { DataProcessingTransparency } from '@/components/ui/DataProcessingTransparency';
-import { UserStatus } from '@/components/auth/UserStatus';
 import { Step1Welcome } from '@/components/form/Step1Welcome';
 import { Step2CurrentPlan } from '@/components/form/Step2CurrentPlan';
 import { Step3FileUpload } from '@/components/form/Step3FileUpload';
@@ -188,6 +187,7 @@ export default function Home() {
             qualityScore={qualityScore}
             savingToAccount={savingToAccount}
             formData={formData}
+            currentPlan={formData.currentPlan}
           />
           <div className="text-center pt-4">
             <button
@@ -304,9 +304,6 @@ export default function Home() {
               <p className="text-gray-600 mt-1">
                 AI-powered energy plan recommendations for Texas residential customers
               </p>
-            </div>
-            <div className="ml-4">
-              <UserStatus />
             </div>
           </div>
 

@@ -3,17 +3,23 @@
 import React from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { Recommendation } from '@/lib/types';
+import { PlanDetailsModal } from './PlanDetailsModal';
+import { Recommendation, CurrentPlanData, ParsedUsageData } from '@/lib/types';
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
   rank: number;
+  currentPlan?: CurrentPlanData;
+  usageData?: ParsedUsageData;
 }
 
 export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   recommendation,
   rank,
+  currentPlan,
+  usageData,
 }) => {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
   const { plan, explanation, confidence } = recommendation;
 
   const confidenceColors = {
@@ -29,7 +35,11 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   };
 
   return (
-    <Card className="relative h-full flex flex-col overflow-visible">
+    <>
+      <Card
+        className="relative h-full flex flex-col overflow-visible cursor-pointer hover:shadow-lg transition-shadow duration-200"
+        onClick={() => setIsModalOpen(true)}
+      >
       {/* Rank Badge */}
       <div className="absolute -top-3 -left-3 bg-primary-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow-lg z-10">
         {rank}
@@ -161,6 +171,16 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
         </div>
       </div>
     </Card>
+
+    <PlanDetailsModal
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      recommendation={recommendation}
+      rank={rank}
+      currentPlan={currentPlan}
+      usageData={usageData}
+    />
+    </>
   );
 };
 

@@ -240,70 +240,52 @@ export function calculatePlanScore(
   const supplier = suppliers.find((s) => s.id === plan.supplierId);
   const supplierRating = supplier ? supplier.rating / 5 : 3 / 5; // Default to 3/5 if not found
 
-  // Weighted score
+  // Base weighted score (cost and renewable preferences)
   const costScore = costWeight * normalizedSavings;
   const renewableScore = renewableWeight * normalizedRenewable;
-  const supplierScore = 0.1 * supplierRating; // 10% weight for supplier rating
 
-  return costScore + renewableScore + supplierScore;
+  // Additional preference scoring (with lower weights to not override main preferences)
+  let additionalScore = 0;
+
+  // Supplier reputation preference (0.05 weight)
+  if (preferences.supplierReputation === 'high-only') {
+    additionalScore += 0.05 * supplierRating;
+  } else if (preferences.supplierReputation === 'any-ok') {
+    additionalScore += 0.05 * 0.5; // Neutral boost
+  }
+
+  // Price stability preference (0.03 weight)
+  const isFixedRate = !plan.rateStructure || plan.rateStructure.type === 'fixed';
+  if (preferences.priceStability === 'fixed-only') {
+    additionalScore += isFixedRate ? 0.03 : -0.03; // Boost fixed, penalize variable
+  } else if (preferences.priceStability === 'variable-ok') {
+    additionalScore += 0.03 * 0.5; // Neutral boost for flexibility
+  }
+
+  // Plan complexity preference (0.02 weight)
+  const isSimplePlan = !plan.rateStructure || plan.rateStructure.type === 'fixed';
+  if (preferences.planComplexity === 'simple-only') {
+    additionalScore += isSimplePlan ? 0.02 : -0.02; // Boost simple, penalize complex
+  } else if (preferences.planComplexity === 'complex-ok') {
+    additionalScore += 0.02 * 0.5; // Neutral boost for sophistication
+  }
+
+  // Supplier diversity preference (handled separately in selection, not scoring)
+  // This preference affects which plans get selected, not their individual scores
+
+  // Final score combines base preferences with additional criteria
+  return costScore + renewableScore + additionalScore;
 }
 
 /**
- * Select diverse recommendations (budget, balanced, premium)
+ * Select top 3 highest-scoring recommendations based on user preferences
  */
-export function selectDiverseRecommendations(
+export function selectTopRecommendations(
   scoredPlans: PlanWithCosts[]
 ): PlanWithCosts[] {
-  if (scoredPlans.length <= 3) {
-    return scoredPlans.slice(0, 3);
-  }
-
-  // Sort by score (highest first)
+  // Sort by score (highest first) and return top 3
   const sorted = [...scoredPlans].sort((a, b) => b.score - a.score);
-
-  const selected: PlanWithCosts[] = [];
-  const usedSupplierIds = new Set<string>();
-
-  // Strategy: Select top-scoring plans with diversity constraints
-  // 1. First, pick the highest scoring plan
-  selected.push(sorted[0]);
-  usedSupplierIds.add(sorted[0].supplierId);
-
-  // 2. Then pick plans that add diversity (different suppliers, different price points)
-  for (const plan of sorted.slice(1)) {
-    if (selected.length >= 3) break;
-
-    // Prefer plans from different suppliers
-    const isNewSupplier = !usedSupplierIds.has(plan.supplierId);
-
-    // Prefer plans with different characteristics
-    const hasDifferentPrice = selected.every(
-      (selectedPlan) =>
-        Math.abs(selectedPlan.rate - plan.rate) > 1.0 // At least 1 cent difference
-    );
-
-    const hasDifferentRenewable = selected.every(
-      (selectedPlan) =>
-        Math.abs(selectedPlan.renewablePercentage - plan.renewablePercentage) > 20
-    );
-
-    if (isNewSupplier || hasDifferentPrice || hasDifferentRenewable) {
-      selected.push(plan);
-      usedSupplierIds.add(plan.supplierId);
-    }
-  }
-
-  // If we still don't have 3, fill with highest remaining scores
-  while (selected.length < 3 && sorted.length > selected.length) {
-    const remaining = sorted.filter((p) => !selected.includes(p));
-    if (remaining.length > 0) {
-      selected.push(remaining[0]);
-    } else {
-      break;
-    }
-  }
-
-  return selected.slice(0, 3);
+  return sorted.slice(0, 3);
 }
 
 /**
@@ -392,8 +374,8 @@ export async function generateRecommendations(
     };
   });
 
-  // Select diverse top 3
-  const topPlans = selectDiverseRecommendations(plansWithCosts);
+  // Select top 3 highest-scoring plans
+  const topPlans = selectTopRecommendations(plansWithCosts);
 
   // Generate recommendations with explanations
   const recommendations: Recommendation[] = topPlans.map((plan) => ({

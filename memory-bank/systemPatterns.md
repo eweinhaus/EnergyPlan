@@ -76,11 +76,11 @@ XML File → Parse (fast-xml-parser) → Validate → Aggregate → Calculate Co
    ```typescript
    annualCost = sum(monthlyUsage × rate + deliveryFees + adminFees)
    ```
-2. **Scoring**: Weighted score based on preferences (cost + renewable)
+2. **Scoring**: Weighted score based on preferences (cost + renewable + additional criteria)
    ```typescript
-   score = (costWeight × normalizedSavings) + (renewableWeight × normalizedRenewable) + (supplierRating × 0.1)
+   score = (costWeight × normalizedSavings) + (renewableWeight × normalizedRenewable) + additionalPreferences
    ```
-3. **Diversity Selection**: Ensure varied recommendations (budget, balanced, premium)
+3. **Top Selection**: Select top 3 highest-scoring plans (pure preference-based, no forced diversity)
 4. **Explanation Generation**: Simple language explaining why each plan was chosen
 
 ### Error Handling Pattern
@@ -174,15 +174,12 @@ score = costScore + renewableScore + supplierScore
 - **Error Handling**: Clear error messages for users
 - **Data Source**: EIA provides statistical data; supplier/plan data is static
 
-### Diversity Selection Pattern
+### Top Selection Pattern
 ```typescript
 1. Sort plans by score (highest first)
-2. Select top-scoring plan
-3. For remaining slots:
-   - Prefer different suppliers
-   - Prefer different price points (>1 cent difference)
-   - Prefer different renewable percentages (>20% difference)
-4. Fill remaining slots with highest-scoring plans
+2. Select top 3 highest-scoring plans
+3. No forced diversity constraints - pure preference-based selection
+4. User preferences for supplier variety handled through scoring weights
 ```
 
 ## Scalability Considerations

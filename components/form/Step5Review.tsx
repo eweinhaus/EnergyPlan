@@ -136,7 +136,10 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
         {!user && !isProcessing && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="text-lg font-semibold text-blue-900 mb-2">
-              💾 Save Your Recommendations
+              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+              </svg>
+              Save Your Recommendations
             </h3>
             <p className="text-blue-700 mb-3">
               Create a free account to save and revisit your recommendations anytime, compare plans over time, and export professional PDF reports.
