@@ -93,18 +93,32 @@ EnergyPlan/
 │   ├── recommendationEngine.ts   # Recommendation algorithm
 │   ├── types.ts                  # TypeScript type definitions
 │   └── xmlParser.ts              # Green Button XML parser
-├── memory-bank/                  # Project documentation
-├── planning/                     # Planning documents
+├── memory-bank/                  # Project documentation (ignored by git)
+├── planning/                     # Planning documents (ignored by git)
 ├── samples/                      # Sample XML files for testing
+├── monitor-deployment.js         # Render MCP monitoring script
 ├── package.json
 ├── tsconfig.json
 ├── tailwind.config.ts
 ├── next.config.js
 ├── render.yaml                   # Render deployment config
-└── DEPLOYMENT.md                 # Deployment guide
+├── DEPLOYMENT.md                 # Deployment guide
+└── README.md                     # Main documentation (tracked by git)
 ```
 
-## Dependencies
+## Deployment Monitoring
+
+### Render MCP Monitoring Script
+- **monitor-deployment.js**: Automated deployment monitoring and management
+- **Purpose**: Provides programmatic access to Render deployment status, logs, and metrics
+- **Commands**: status, logs, metrics, deploy
+- **Integration**: Uses Render MCP tools for automated monitoring
+- **Service ID**: Configured for production deployment monitoring
+
+### .gitignore Configuration
+- **Documentation Exclusion**: planning/ and memory-bank/ directories excluded from version control
+- **Rationale**: Documentation files are version-controlled separately or not needed in repo
+- **Exception**: README.md is tracked as main project documentation
 
 ### Production Dependencies
 ```json
@@ -177,6 +191,9 @@ node test-performance.js
 
 # Accessibility validation
 node test-accessibility.js
+
+# Deployment monitoring
+node monitor-deployment.js [command]
 ```
 
 ### Code Organization
@@ -230,6 +247,7 @@ node test-accessibility.js
 ### Deployment Files
 - **render.yaml**: Render service configuration
 - **DEPLOYMENT.md**: Complete deployment guide
+- **monitor-deployment.js**: Render MCP monitoring script
 - **.env.local.example**: Environment variable template
 
 ## Development Best Practices

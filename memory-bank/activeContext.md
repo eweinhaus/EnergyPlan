@@ -101,7 +101,7 @@ The MVP is fully functional and ready for:
 1. **Deploy to Render**
    - Configure environment variables
    - Set up production build
-   - Monitor initial deployment
+   - Monitor initial deployment using monitor-deployment.js script
 
 2. **Real API Integration**
    - Replace mock data with real UtilityAPI calls
@@ -112,6 +112,11 @@ The MVP is fully functional and ready for:
    - Test with real users and real XML files
    - Gather feedback on UX and recommendations
    - Validate accuracy with real-world scenarios
+
+4. **Production Monitoring**
+   - Use Render MCP tools for automated monitoring
+   - Track performance metrics and deployment status
+   - Monitor logs and metrics using provided scripts
 
 ## Active Decisions & Considerations
 
