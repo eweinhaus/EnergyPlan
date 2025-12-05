@@ -10,7 +10,7 @@ const { execSync } = require('child_process');
 
 class VercelDeploymentHelper {
   constructor() {
-    this.projectName = 'energy-plan-mvp';
+    this.projectName = 'EnergyPlan';
     this.teamId = null; // Would be set from environment or configuration
   }
 
@@ -25,11 +25,11 @@ class VercelDeploymentHelper {
     console.log(`📋 Project: ${this.projectName}`);
     console.log('📊 Deployment Status: Building...');
     console.log('⏱️  Build Duration: ~2-3 minutes');
-    console.log('🌐 Domain: https://energy-plan-mvp.vercel.app');
+    console.log('🌐 Domain: https://energyplan.vercel.app');
 
     return {
       status: 'building',
-      url: 'https://energy-plan-mvp.vercel.app',
+      url: 'https://energyplan.vercel.app',
       buildTime: '2-3 minutes'
     };
   }
@@ -72,8 +72,8 @@ class VercelDeploymentHelper {
     console.log('🧪 Testing core application features...');
 
     const testUrls = [
-      'https://energy-plan-mvp.vercel.app',
-      'https://energy-plan-mvp.vercel.app/api/process-data'
+      'https://energyplan.vercel.app',
+      'https://energyplan.vercel.app/api/process-data'
     ];
 
     console.log('🌐 Testing endpoints:');
