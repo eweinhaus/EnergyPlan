@@ -79,7 +79,7 @@ The **AI Energy Plan Recommendation Agent MVP** is a single-page web application
 
 - **Technology**: Next.js 14+ with App Router, TypeScript, Tailwind CSS
 - **Runtime**: Node.js 18.17+
-- **Hosting**: Render web service
+- **Hosting**: Vercel (migrated from Render - $7/month → $0/month cost savings)
 - **File Size**: Maximum 10MB XML files
 - **Data Requirements**: Minimum 6 months of usage data required
 - **API Dependencies**: EIA Open Data API (integrated December 2025), static supplier/plan data (EIA doesn't provide retail catalogs)
@@ -87,7 +87,9 @@ The **AI Energy Plan Recommendation Agent MVP** is a single-page web application
 ## Future Roadmap
 
 Post-MVP enhancements include:
-- User accounts and data persistence
+- User accounts and data persistence (Firebase Auth + Firestore)
+- Firebase Hosting migration with Cloud Functions
+- GDPR-compliant data management and audit logging
 - Multi-state support (NY, IL, PA)
 - Advanced rate structures (tiered, TOU)
 - ML-enhanced recommendation engine

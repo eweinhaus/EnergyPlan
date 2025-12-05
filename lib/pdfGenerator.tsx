@@ -1,3 +1,4 @@
+import React from 'react';
 import { PDFOptions, PDFGenerationResult, Recommendation, EnergyPlanFormData } from './types';
 
 /**

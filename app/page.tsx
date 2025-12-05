@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
+// Force dynamic rendering for Firebase Functions
+export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { ConsentBanner, ConsentState } from '@/components/ui/ConsentBanner';

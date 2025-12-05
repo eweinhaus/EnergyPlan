@@ -48,6 +48,7 @@ UTILITY_API_KEY=your_production_eia_api_key
 FIREBASE_PROJECT_ID=your_project_id
 FIREBASE_PRIVATE_KEY=your_private_key
 FIREBASE_CLIENT_EMAIL=your_client_email
+
 EOL
 
     echo "⚠️  Please update .env.production with your actual Firebase credentials"

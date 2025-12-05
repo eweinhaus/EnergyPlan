@@ -1,7 +1,4 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
-
+// Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -11,22 +8,51 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Create mock objects for SSR
+const createMockAuth = () => ({
+  onAuthStateChanged: () => () => {},
+  signInWithEmailAndPassword: async () => { throw new Error('Firebase not initialized'); },
+  createUserWithEmailAndPassword: async () => { throw new Error('Firebase not initialized'); },
+  signOut: async () => { throw new Error('Firebase not initialized'); },
+  sendPasswordResetEmail: async () => { throw new Error('Firebase not initialized'); },
+});
 
-// Initialize Firebase services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const createMockDb = () => ({
+  collection: () => ({ doc: () => ({ set: async () => {}, get: async () => ({ exists: () => false, data: () => ({}) }) }) }),
+  doc: () => ({ set: async () => {}, get: async () => ({ exists: () => false, data: () => ({}) }) }),
+});
 
-// Connect to emulators in development
-if (process.env.NODE_ENV === 'development') {
+// Initialize Firebase (client-side only)
+let app: any = null;
+let auth: any = createMockAuth();
+let db: any = createMockDb();
+
+if (typeof window !== 'undefined') {
   try {
-    connectAuthEmulator(auth, "http://localhost:9099");
-    connectFirestoreEmulator(db, 'localhost', 8080);
-    console.log('Connected to Firebase emulators');
+    const { initializeApp } = require('firebase/app');
+    const { getAuth, connectAuthEmulator } = require('firebase/auth');
+    const { getFirestore, connectFirestoreEmulator } = require('firebase/firestore');
+
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+
+    // Connect to emulators in development
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        connectAuthEmulator(auth, "http://localhost:9099");
+        connectFirestoreEmulator(db, 'localhost', 8080);
+        console.log('Connected to Firebase emulators');
+      } catch (error) {
+        console.log('Failed to connect to emulators:', error);
+      }
+    }
   } catch (error) {
-    console.log('Failed to connect to emulators:', error);
+    console.error('Failed to initialize Firebase:', error);
   }
 }
+
+// Export with fallbacks for SSR
+export { auth, db, app };
 
 export default app;

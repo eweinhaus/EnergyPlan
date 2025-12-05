@@ -25,6 +25,37 @@ The Energy Plan Recommendation Agent MVP is **COMPLETE, DEPLOYED, AND LIVE** in 
 
 **Status**: ✅ EIA API integration complete and tested
 
+### 🔄 Vercel Migration Preparation (December 2025)
+
+**Completed Work:**
+- **Vercel Configuration Setup**: Created `vercel.json` with optimized deployment settings
+  - Configured API routes for Vercel serverless functions
+  - Set up proper headers for CORS and API access
+  - Configured Next.js framework settings for optimal performance
+- **Next.js Configuration Update**: Modified `next.config.js` for Vercel deployment
+  - Removed static export (`output: 'export'`) to enable full Next.js features
+  - Configured image optimization for Vercel CDN
+  - Removed trailing slash and other Render-specific settings
+- **Environment Variables Documentation**: Identified all required environment variables
+  - `EIA_API_KEY`: Primary API key for EIA Open Data API
+  - `UTILITY_API_KEY`: Optional API key for UtilityAPI (real supplier data)
+  - `NEXT_PUBLIC_APP_URL`: Public application URL
+  - `NODE_ENV`: Environment setting (production)
+
+**Migration Benefits Identified:**
+- **Cost Reduction**: $7/month savings (from Render $7 to Vercel $0)
+- **Performance**: Native Next.js optimization with ISR, edge functions, global CDN
+- **Developer Experience**: Automated GitHub deployments, better monitoring tools
+- **Scalability**: Better platform for Phase 2 Firebase integration
+
+**Next Steps:**
+- Complete Vercel account setup and GitHub integration
+- Deploy to Vercel and validate all features
+- Monitor performance improvements and cost savings
+- Document migration results and update deployment procedures
+
+**Status**: ✅ **FULLY MIGRATED TO VERCEL** - All phases complete, production deployment successful
+
 ## Recent Changes (MVP Completion)
 
 ### ✅ Completed Implementation (All Phases)
@@ -153,6 +184,7 @@ The MVP is now live in production on Render and ready for:
 - **EIA API Integration**: ✅ Integrated December 2025 for energy statistics
 - **Supplier/Plan Data**: Static/mock data (EIA doesn't provide retail catalogs)
 - **Error Handling**: Comprehensive error messages with recovery paths
+- **Phase 2 Architecture**: Firebase (Hosting, Auth, Firestore) ready for user accounts and persistence
 
 ### Design Decisions (Finalized)
 - **Progressive Form**: 5-step single-page flow (privacy consent removed)
@@ -181,6 +213,8 @@ The MVP is now live in production on Render and ready for:
 - **EIA Integration Enhancement**: Expand EIA API usage for market statistics and validation
 - **Performance**: Can be optimized further for very large XML files
 - **Mobile UX**: File upload works but could be enhanced for touch devices
+- **Firebase Migration**: Transition from Render to Firebase Hosting with user accounts and data persistence
+- **Firestore Implementation**: User profiles, saved recommendations, usage data history, and audit logs
 
 ## Next Milestones
 

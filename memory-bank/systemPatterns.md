@@ -4,21 +4,31 @@
 
 ### High-Level Architecture
 ```
-User Browser → Next.js Frontend → Next.js API Routes → In-Memory Processing
+Current (MVP): User Browser → Next.js Frontend → Next.js API Routes → In-Memory Processing
                                                       ↓
                                     XML Parser (fast-xml-parser) → Recommendation Engine
                                                       ↓
                                     Background Sync → EIA Open Data API (Statistical Data)
                                                       ↓
                                     Static Supplier/Plan Data (EIA doesn't provide retail catalogs)
+
+Future (Phase 2): User Browser → Firebase Hosting → Firebase Functions (Next.js SSR)
+                                                      ↓
+                                    Firebase Auth → Firestore Database → User Data Persistence
+                                                      ↓
+                                    XML Parser (fast-xml-parser) → Recommendation Engine
+                                                      ↓
+                                    EIA Open Data API + Real Retail Supplier APIs
 ```
 
 ### Component Structure
 - **Frontend**: Single-page React application with progressive form steps
-- **Backend**: Next.js API routes for data processing
-- **Processing**: In-memory Node.js processing (no database for MVP)
+- **Backend**: Next.js API routes for data processing (MVP), Firebase Functions (Phase 2)
+- **Processing**: In-memory Node.js processing (MVP), Firestore persistence (Phase 2)
+- **Authentication**: Firebase Auth for user accounts (Phase 2)
+- **Database**: Firestore for user data, recommendations, and audit logs (Phase 2)
 - **External APIs**: EIA Open Data API for energy statistics (integrated December 2025)
-- **Supplier/Plan Data**: Static/mock data (EIA doesn't provide retail supplier catalogs)
+- **Supplier/Plan Data**: Static/mock data (MVP), Real retail supplier APIs (Phase 2)
 
 ## Key Technical Decisions
 

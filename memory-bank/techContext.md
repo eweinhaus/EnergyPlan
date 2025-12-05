@@ -25,6 +25,7 @@
 - **Type Checking**: TypeScript compiler (strict mode)
 - **Linting**: ESLint with Next.js config
 - **CSS Processing**: PostCSS with Autoprefixer
+- **Firebase CLI**: Firebase Tools for deployment and management (Phase 2)
 
 ## Development Environment Setup
 
@@ -208,6 +209,19 @@ node monitor-deployment.js [command]
 
 ## External Integrations
 
+### Firebase (Phase 2)
+- **Authentication**: Firebase Auth with Email/Password and Google providers
+- **Database**: Firestore NoSQL database for user data and recommendations
+- **Hosting**: Firebase Hosting for static assets and SSR
+- **Security**: Firestore security rules for data access control
+- **Admin SDK**: Server-side Firebase Admin SDK for privileged operations
+- **Emulators**: Local development with Firebase emulators (Auth, Firestore)
+- **Deployment**: Firebase CLI and automated deployment scripts
+- **Budget Monitoring**: $20/month limit with automated monitoring
+- **Status**: Complete configuration ready for Phase 2 deployment
+- **Configuration Files**: `firebase.json`, `firestore.rules`, `lib/firebase.ts`, `lib/firebase-admin.ts`, `lib/firestore.ts`
+- **Cloud Functions**: Firebase Functions setup for Next.js SSR (Phase 2)
+
 ### EIA Open Data API
 - **Purpose**: U.S. Energy Information Administration statistical energy data
 - **Authentication**: API key via environment variable (`EIA_API_KEY`)
@@ -233,10 +247,12 @@ node monitor-deployment.js [command]
 ## Deployment
 
 ### Hosting Platform
-- **Platform**: Render web service
+- **Current (MVP)**: Render web service
 - **Deployment**: Successfully deployed and live in production
 - **Configuration**: `render.yaml` file included
 - **Environment**: Production environment variables configured and active
+- **Future (Phase 2)**: Firebase Hosting with Firestore and Authentication
+- **Firebase Setup**: Complete configuration files ready for Phase 2 deployment
 
 ### Build Configuration
 - **Build Command**: `npm run build`

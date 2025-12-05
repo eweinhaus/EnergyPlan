@@ -15,18 +15,28 @@ export async function generatePDFWithReactPDF(
   }
 ): Promise<PDFGenerationResult> {
   try {
-    const { pdf } = await import('@react-pdf/renderer');
-    const { RecommendationPDF } = await import('@/components/pdf/RecommendationPDF');
+    const { pdf, Document, Page, Text, View } = await import('@react-pdf/renderer');
 
     const startTime = Date.now();
 
-    // Create PDF blob
+    // Create PDF blob with inline Document
     const blob = await pdf(
-      <RecommendationPDF
-        recommendations={recommendations}
-        formData={formData}
-        options={options}
-      />
+      React.createElement(Document, null,
+        React.createElement(Page, { size: "A4" },
+          React.createElement(View, null,
+            React.createElement(Text, null, "Energy Plan Recommendations"),
+            React.createElement(Text, null, `Generated on ${new Date().toLocaleDateString()}`),
+            // Add basic recommendations content
+            recommendations.map((rec, index) =>
+              React.createElement(View, { key: index },
+                React.createElement(Text, null, `${index + 1}. ${rec.plan.name}`),
+                React.createElement(Text, null, `Savings: $${rec.plan.savings.toFixed(2)}`),
+                React.createElement(Text, null, rec.explanation)
+              )
+            )
+          )
+        )
+      )
     ).toBlob();
 
     const endTime = Date.now();

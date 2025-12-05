@@ -1,3 +1,4 @@
+import React from 'react';
 import { PDFOptions, PDFGenerationResult, Recommendation, EnergyPlanFormData } from './types';
 
 /**
@@ -20,13 +21,12 @@ export async function generatePDFWithReactPDF(
     const startTime = Date.now();
 
     // Create PDF blob
-    const blob = await pdf(
-      React.createElement(RecommendationPDF, {
-        recommendations,
-        formData,
-        options,
-      })
-    ).toBlob();
+    const element = React.createElement(RecommendationPDF, {
+      recommendations,
+      formData,
+      options,
+    }) as any; // Type assertion for react-pdf compatibility
+    const blob = await pdf(element).toBlob();
 
     const endTime = Date.now();
     const generationTime = endTime - startTime;
@@ -108,7 +108,7 @@ export async function generatePDFWithPuppeteer(
     const generationTime = endTime - startTime;
 
     // Create blob URL
-    const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+    const blob = new Blob([new Uint8Array(pdfBuffer)], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
 
     return {

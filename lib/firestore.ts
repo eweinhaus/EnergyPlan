@@ -12,6 +12,11 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { db } from './firebase';
+
+// Helper function to check if Firebase is available
+const isFirebaseAvailable = () => {
+  return typeof window !== 'undefined' && db !== null;
+};
 import {
   UserProfile,
   SavedRecommendation,
@@ -24,6 +29,9 @@ import {
 
 // User Profile Operations
 export const createUserProfile = async (userId: string, email: string, displayName?: string): Promise<void> => {
+  if (!isFirebaseAvailable()) {
+    throw new Error('Firebase is not available');
+  }
   const userDoc = doc(db, 'users', userId);
   const defaultConsent: GDPRConsent = {
     analytics: false,
@@ -49,6 +57,9 @@ export const createUserProfile = async (userId: string, email: string, displayNa
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  if (!isFirebaseAvailable()) {
+    return null;
+  }
   const userDoc = await getDoc(doc(db, 'users', userId));
   if (!userDoc.exists()) return null;
 
