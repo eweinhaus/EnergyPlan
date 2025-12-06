@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { updateUserProfile } from '@/lib/firestore';
 import { GDPRConsent } from '@/lib/types';
@@ -27,13 +27,7 @@ export const ConsentManager: React.FC<ConsentManagerProps> = ({ onConsentChange 
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Load current consent settings
-  useEffect(() => {
-    if (user) {
-      loadUserConsent();
-    }
-  }, [user, loadUserConsent]);
-
-  const loadUserConsent = async () => {
+  const loadUserConsent = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -46,7 +40,13 @@ export const ConsentManager: React.FC<ConsentManagerProps> = ({ onConsentChange 
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadUserConsent();
+    }
+  }, [user, loadUserConsent]);
 
   const handleConsentChange = (key: keyof GDPRConsent, value: boolean) => {
     if (key === 'dataProcessing') return; // Cannot disable core functionality

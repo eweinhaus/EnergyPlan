@@ -3,7 +3,7 @@
 // Force dynamic rendering to avoid SSR issues with Firebase
 export const runtime = 'edge';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
@@ -23,6 +23,20 @@ export default function Dashboard() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'recommendations' | 'privacy' | 'settings'>('recommendations');
 
+  const loadRecommendations = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      setLoadingRecommendations(true);
+      const userRecommendations = await getUserRecommendations(user.uid);
+      setRecommendations(userRecommendations);
+    } catch (error) {
+      console.error('Error loading recommendations:', error);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!loading && !user) {
       router.push('/');
@@ -33,18 +47,6 @@ export default function Dashboard() {
       loadRecommendations();
     }
   }, [user, loading, router, loadRecommendations]);
-
-  const loadRecommendations = async () => {
-    try {
-      setLoadingRecommendations(true);
-      const userRecommendations = await getUserRecommendations(user!.uid);
-      setRecommendations(userRecommendations);
-    } catch (error) {
-      console.error('Error loading recommendations:', error);
-    } finally {
-      setLoadingRecommendations(false);
-    }
-  };
 
   const handleDeleteRecommendation = async (recommendationId: string) => {
     if (!confirm('Are you sure you want to delete this recommendation? This action cannot be undone.')) {
