@@ -17,42 +17,66 @@ export function validateUsageData(data: ParsedUsageData): {
   }
 
   // Validate monthly totals
+  // Filter out partial months (< 5 days) for variation calculations
+  const completeMonths = data.monthlyTotals.filter((m) => m.daysWithData >= 5);
+  
+  // Identify edge months (first and last in the dataset)
+  // These often have partial data which is normal and expected
+  const sortedMonths = [...data.monthlyTotals].sort((a, b) => a.month.localeCompare(b.month));
+  const firstMonth = sortedMonths[0]?.month;
+  const lastMonth = sortedMonths[sortedMonths.length - 1]?.month;
+  
   for (const month of data.monthlyTotals) {
     // Check for negative values
     if (month.totalKwh < 0) {
       errors.push(`Negative usage detected for ${month.month}`);
     }
 
-    // Check for unrealistic values (too high)
-    if (month.totalKwh > 10000) {
+    // Check for unrealistic values (too high) - adjusted for Texas summer usage
+    // 12,000 kWh is more reasonable threshold for large homes with AC in hot climates
+    if (month.totalKwh > 12000) {
       warnings.push(`Unusually high usage for ${month.month}: ${month.totalKwh} kWh`);
     }
 
-    // Check for zero or very low usage
+    // Check for zero or very low usage (only for months with sufficient data)
     if (month.totalKwh === 0) {
       warnings.push(`Zero usage detected for ${month.month}`);
-    } else if (month.totalKwh < 50) {
+    } else if (month.totalKwh < 50 && month.daysWithData >= 20) {
+      // Only warn about low usage if the month has enough days to be meaningful
       warnings.push(`Very low usage for ${month.month}: ${month.totalKwh} kWh`);
     }
 
     // Check data completeness
-    if (month.daysWithData < 20) {
-      warnings.push(`Incomplete data for ${month.month}: only ${month.daysWithData} days`);
+    // Edge months (first/last) often have partial data which is normal
+    // Only warn about incomplete data if:
+    // 1. It's NOT an edge month, OR
+    // 2. It's an edge month but has significant data (5-19 days) suggesting it should be more complete
+    const isEdgeMonth = month.month === firstMonth || month.month === lastMonth;
+    const isVerySmallPartial = month.daysWithData > 0 && month.daysWithData < 5;
+    
+    if (month.daysWithData > 0 && month.daysWithData < 20) {
+      // Don't warn about very small partial months at edges (normal for utility data exports)
+      if (!isEdgeMonth || !isVerySmallPartial) {
+        warnings.push(`Incomplete data for ${month.month}: only ${month.daysWithData} days`);
+      }
     }
   }
 
-  // Check for extreme variations (potential data issues)
-  const totals = data.monthlyTotals.map((m) => m.totalKwh);
-  const avgUsage = totals.reduce((a, b) => a + b, 0) / totals.length;
-  const maxUsage = Math.max(...totals);
-  const minUsage = Math.min(...totals);
+  // Check for extreme variations (only using complete months to avoid false positives)
+  if (completeMonths.length >= 3) {
+    const totals = completeMonths.map((m) => m.totalKwh);
+    const avgUsage = totals.reduce((a, b) => a + b, 0) / totals.length;
+    const maxUsage = Math.max(...totals);
+    const minUsage = Math.min(...totals);
 
-  if (maxUsage > avgUsage * 3) {
-    warnings.push('Extreme variation detected: some months have unusually high usage');
-  }
+    if (maxUsage > avgUsage * 3) {
+      warnings.push('Extreme variation detected: some months have unusually high usage');
+    }
 
-  if (minUsage < avgUsage * 0.1 && minUsage > 0) {
-    warnings.push('Extreme variation detected: some months have unusually low usage');
+    // Only check for low variation if we have enough complete months
+    if (minUsage < avgUsage * 0.1 && minUsage > 0 && completeMonths.length >= 6) {
+      warnings.push('Extreme variation detected: some months have unusually low usage');
+    }
   }
 
   // Validate date range

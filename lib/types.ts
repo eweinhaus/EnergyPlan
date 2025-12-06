@@ -8,8 +8,8 @@ export interface CurrentPlanData {
 }
 
 export interface UserPreferences {
-  costPriority: number; // 0-100
-  renewablePriority: number; // 0-100, must sum to 100 with costPriority
+  costPriority: number; // Always 100 (defaults to cost savings priority)
+  renewablePriority: number; // Always 0 (cost savings is always prioritized)
 
   // New preference criteria
   supplierDiversity?: 'prefer-variety' | 'prefer-best' | 'no-preference'; // NEW

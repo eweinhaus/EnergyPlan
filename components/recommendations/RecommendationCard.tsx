@@ -8,6 +8,7 @@ import { Recommendation, CurrentPlanData, ParsedUsageData, PlanWithScenarios } f
 interface RecommendationCardProps {
   recommendation: Recommendation;
   rank: number;
+  suppliers?: { id: string; rating: number }[];
   currentPlan?: CurrentPlanData;
   usageData?: ParsedUsageData;
 }
@@ -15,6 +16,7 @@ interface RecommendationCardProps {
 export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   recommendation,
   rank,
+  suppliers = [],
   currentPlan,
   usageData,
 }) => {
@@ -148,6 +150,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       onClose={() => setIsModalOpen(false)}
       recommendation={recommendation}
       rank={rank}
+      suppliers={suppliers}
       currentPlan={currentPlan}
       usageData={usageData}
     />

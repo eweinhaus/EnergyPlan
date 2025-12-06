@@ -40,16 +40,27 @@ npm install
 3. Set up environment variables:
 Create a `.env.local` file in the root directory:
 ```env
+# EIA API (FREE - Recommended for energy statistics)
 EIA_API_KEY=your_eia_api_key_here
-# EIA_API_KEY can be obtained from https://www.eia.gov/opendata/register.php
-# Legacy support: UTILITY_API_KEY will be used as fallback if EIA_API_KEY is not set
+# Get FREE API key at: https://www.eia.gov/opendata/register.php
+# No credit card required, unlimited use
+
+# Genability API (Optional - requires paid Arcadia account)
+GENABILITY_API_KEY=your_genability_api_key_here
+# See GENABILITY_API_SETUP.md - Note: Genability now requires Arcadia subscription
+
+# Legacy support: UTILITY_API_KEY can be used as fallback
+UTILITY_API_KEY=your_utility_api_key_here
+
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 **Note**: 
-- EIA API provides statistical energy data (not retail supplier/plan catalogs)
-- Supplier and plan data are currently static/mock data
-- For MVP testing, the application uses mock data if API keys are not provided
+- **EIA API**: ✅ **FREE** - Get free API key at https://www.eia.gov/opendata/register.php (takes 2 minutes)
+- **EIA API**: Provides statistical energy data (not retail supplier/plan catalogs)
+- **Genability API**: Now part of Arcadia, requires paid subscription (see GENABILITY_API_SETUP.md)
+- **Fallback**: If no API keys are provided, the application uses official Texas supplier/plan data (works great for MVP!)
+- See `FREE_API_OPTIONS.md` for comprehensive research on free API options
 
 ### Development
 

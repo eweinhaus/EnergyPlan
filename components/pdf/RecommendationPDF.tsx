@@ -217,19 +217,13 @@ export const RecommendationPDF: React.FC<RecommendationPDFProps> = ({
           <Text style={styles.sectionTitle}>Your Preferences</Text>
           <View style={styles.table}>
             <View style={[styles.tableRow, styles.tableHeader]}>
-              <View style={styles.tableCell}>
-                <Text>Cost Priority</Text>
-              </View>
               <View style={[styles.tableCell, styles.tableCellLast]}>
-                <Text>Renewable Priority</Text>
+                <Text>Priority</Text>
               </View>
             </View>
             <View style={styles.tableRow}>
-              <View style={styles.tableCell}>
-                <Text>{formData.preferences.costPriority}%</Text>
-              </View>
               <View style={[styles.tableCell, styles.tableCellLast]}>
-                <Text>{formData.preferences.renewablePriority}%</Text>
+                <Text>Cost Savings</Text>
               </View>
             </View>
           </View>

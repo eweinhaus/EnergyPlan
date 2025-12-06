@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { parseGreenButtonXML } from '@/lib/xmlParser';
 import { validateUsageData, calculateDataQualityScore } from '@/lib/dataValidation';
 import { generateRecommendations } from '@/lib/recommendationEngine';
-import { getPlans } from '@/lib/apiClients';
+import { getPlans, getSuppliers } from '@/lib/apiClients';
 import { CurrentPlanData, UserPreferences, ParsedUsageData, ContractTerms } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
@@ -38,13 +38,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validate preferences sum to 100
-    if (Math.abs(preferences.costPriority + preferences.renewablePriority - 100) > 0.01) {
-      return NextResponse.json(
-        { error: 'Cost and renewable priorities must sum to 100' },
-        { status: 400 }
-      );
-    }
+    // Ensure cost priority is always 100% (default behavior)
+    preferences.costPriority = 100;
+    preferences.renewablePriority = 0;
 
     // Read and parse XML file
     const xmlContent = await xmlFile.text();
@@ -72,11 +68,11 @@ export async function POST(request: NextRequest) {
     // EIA API key is used for energy statistics
     const eiaApiKey = process.env.EIA_API_KEY || '';
 
-    // UtilityAPI key is used for real retail supplier/plan data
+    // Genability API key is preferred for supplier/plan data
+    // Fallback to UtilityAPI key, then EIA key, then empty string
+    const genabilityApiKey = process.env.GENABILITY_API_KEY || '';
     const utilityApiKey = process.env.UTILITY_API_KEY || '';
-
-    // Use UtilityAPI key for supplier/plan data, fallback to EIA key or empty string
-    const apiKey = utilityApiKey || eiaApiKey;
+    const apiKey = genabilityApiKey || utilityApiKey || eiaApiKey;
 
     // Get available plans (uses official Texas data)
     const plans = await getPlans(apiKey);
@@ -87,6 +83,9 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Get suppliers for rating information
+    const suppliers = await getSuppliers(apiKey);
 
     // Generate recommendations
     let recommendations;
@@ -107,10 +106,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return success with recommendations
+    // Return success with recommendations and suppliers
     return NextResponse.json({
       success: true,
       recommendations,
+      suppliers: suppliers.map(s => ({ id: s.id, rating: s.rating })),
       dataQuality: usageData.dataQuality,
       qualityScore: calculateDataQualityScore(usageData),
       warnings: validation.warnings,

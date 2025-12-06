@@ -338,13 +338,39 @@ export function calculateSavings(
 export function calculatePlanScore(
   plan: PlanWithCosts,
   preferences: UserPreferences,
-  suppliers: { id: string; rating: number }[]
+  suppliers: { id: string; rating: number }[],
+  allPlansSavings?: number[] // Optional: all savings values for dynamic normalization
 ): number {
   const costWeight = preferences.costPriority / 100;
   const renewableWeight = preferences.renewablePriority / 100;
 
-  // Normalize savings (cap at $500 for scoring)
-  const normalizedSavings = Math.min(Math.max(plan.savings / 500, 0), 1);
+  // Normalize savings with dynamic range-based normalization
+  // If all plans savings are provided, use them to find the range
+  // Otherwise, use a higher cap ($2000) to preserve differences for larger savings
+  let normalizedSavings: number;
+  if (allPlansSavings && allPlansSavings.length > 0) {
+    const maxSavings = Math.max(...allPlansSavings);
+    const minSavings = Math.min(...allPlansSavings);
+    const range = maxSavings - minSavings;
+    
+    if (range > 0) {
+      // Normalize to 0-1 based on actual range
+      normalizedSavings = (plan.savings - minSavings) / range;
+    } else {
+      // All plans have same savings
+      normalizedSavings = 0.5;
+    }
+  } else {
+    // Fallback: use higher cap ($2000) to preserve differences for larger savings
+    // Use logarithmic scaling for very large savings to prevent dominance
+    normalizedSavings = Math.min(Math.max(plan.savings / 2000, 0), 1);
+    // Apply logarithmic scaling for savings > $1000 to preserve relative differences
+    if (plan.savings > 1000) {
+      const excessSavings = plan.savings - 1000;
+      normalizedSavings = 0.5 + (0.5 * Math.log1p(excessSavings / 1000) / Math.log(2));
+      normalizedSavings = Math.min(normalizedSavings, 1);
+    }
+  }
 
   // Normalize renewable percentage
   const normalizedRenewable = plan.renewablePercentage / 100;
@@ -358,29 +384,37 @@ export function calculatePlanScore(
   const renewableScore = renewableWeight * normalizedRenewable;
 
   // Additional preference scoring (with lower weights to not override main preferences)
+  // When costPriority is 100%, these should be minimal tie-breakers only
   let additionalScore = 0;
 
-  // Supplier reputation preference (0.05 weight)
+  // Supplier reputation preference (0.05 weight, but only as tie-breaker when costPriority is high)
   if (preferences.supplierReputation === 'high-only') {
-    additionalScore += 0.05 * supplierRating;
+    // Reduce weight when cost is the primary factor
+    const reputationWeight = costWeight >= 0.8 ? 0.01 : 0.05;
+    additionalScore += reputationWeight * supplierRating;
   } else if (preferences.supplierReputation === 'any-ok') {
-    additionalScore += 0.05 * 0.5; // Neutral boost
+    const reputationWeight = costWeight >= 0.8 ? 0.01 : 0.05;
+    additionalScore += reputationWeight * 0.5; // Neutral boost
   }
 
-  // Price stability preference (0.03 weight)
+  // Price stability preference (0.03 weight, reduced when costPriority is high)
   const isFixedRate = !plan.rateStructure || plan.rateStructure.type === 'fixed';
   if (preferences.priceStability === 'fixed-only') {
-    additionalScore += isFixedRate ? 0.03 : -0.03; // Boost fixed, penalize variable
+    const stabilityWeight = costWeight >= 0.8 ? 0.005 : 0.03;
+    additionalScore += isFixedRate ? stabilityWeight : -stabilityWeight; // Boost fixed, penalize variable
   } else if (preferences.priceStability === 'variable-ok') {
-    additionalScore += 0.03 * 0.5; // Neutral boost for flexibility
+    const stabilityWeight = costWeight >= 0.8 ? 0.005 : 0.03;
+    additionalScore += stabilityWeight * 0.5; // Neutral boost for flexibility
   }
 
-  // Plan complexity preference (0.02 weight)
+  // Plan complexity preference (0.02 weight, reduced when costPriority is high)
   const isSimplePlan = !plan.rateStructure || plan.rateStructure.type === 'fixed';
   if (preferences.planComplexity === 'simple-only') {
-    additionalScore += isSimplePlan ? 0.02 : -0.02; // Boost simple, penalize complex
+    const complexityWeight = costWeight >= 0.8 ? 0.005 : 0.02;
+    additionalScore += isSimplePlan ? complexityWeight : -complexityWeight; // Boost simple, penalize complex
   } else if (preferences.planComplexity === 'complex-ok') {
-    additionalScore += 0.02 * 0.5; // Neutral boost for sophistication
+    const complexityWeight = costWeight >= 0.8 ? 0.005 : 0.02;
+    additionalScore += complexityWeight * 0.5; // Neutral boost for sophistication
   }
 
   // Supplier diversity preference (handled separately in selection, not scoring)
@@ -444,14 +478,8 @@ export function generateExplanation(
     parts.push(`${plan.renewablePercentage}% renewable energy`);
   }
 
-  // Preference-based explanation
-  if (preferences.costPriority > preferences.renewablePriority) {
-    parts.push('Great value for cost-conscious customers');
-  } else if (preferences.renewablePriority > preferences.costPriority) {
-    parts.push('Excellent choice for eco-conscious customers');
-  } else {
-    parts.push('Balanced option for your preferences');
-  }
+  // Preference-based explanation (always cost-focused)
+  parts.push('Great value for cost-conscious customers');
 
   return parts.join('. ') + '.';
 }
@@ -470,26 +498,49 @@ export async function generateRecommendations(
   // Get suppliers for rating information
   const suppliers = await getSuppliers(utilityApiKey);
 
+  // Filter out plans from the current supplier (case-insensitive matching)
+  // Only filter if a supplier name is provided
+  let plansToUse = allPlans;
+  if (currentPlan.supplier && currentPlan.supplier.trim()) {
+    const currentSupplierName = currentPlan.supplier.trim().toLowerCase();
+    const filteredPlans = allPlans.filter((plan) => {
+      const planSupplierName = plan.supplierName.trim().toLowerCase();
+      return planSupplierName !== currentSupplierName;
+    });
+
+    // If no plans remain after filtering, use all plans (fallback)
+    plansToUse = filteredPlans.length > 0 ? filteredPlans : allPlans;
+  }
+
   // Calculate costs for all plans
-  const plansWithCosts: PlanWithCosts[] = allPlans.map((plan) => {
+  const plansWithCosts: PlanWithCosts[] = plansToUse.map((plan) => {
     const annualCost = calculateAnnualCost(plan, usageData);
     const savings = calculateSavings(currentPlan, plan, usageData);
-    const score = calculatePlanScore(
-      { ...plan, annualCost, savings, score: 0 },
-      preferences,
-      suppliers
-    );
 
     return {
       ...plan,
       annualCost,
       savings,
-      score,
+      score: 0, // Will be calculated below with all savings context
     };
   });
 
+  // Extract all savings values for dynamic normalization
+  const allSavings = plansWithCosts.map(p => p.savings);
+
+  // Calculate scores with all savings context for proper normalization
+  const plansWithScores = plansWithCosts.map((plan) => ({
+    ...plan,
+    score: calculatePlanScore(
+      plan,
+      preferences,
+      suppliers,
+      allSavings
+    ),
+  }));
+
   // Select top 3 highest-scoring plans
-  const topPlans = selectTopRecommendations(plansWithCosts);
+  const topPlans = selectTopRecommendations(plansWithScores);
 
   // Calculate current plan annual cost for scenarios
   const currentPlanAnnualCost = calculateAnnualCost(

@@ -11,18 +11,11 @@ const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
  */
 const EIA_API_BASE = 'https://api.eia.gov/v2';
 
-/**
- * Energy API Base URLs
- * Try multiple APIs that provide energy supplier and plan data
- */
-const ENERGY_API_BASES = [
-  // Genability API (primary)
-  'https://api.genability.com/rest/public',
-  // Alternative energy APIs
-  'https://api.arcadia.com/v2',
-  'https://utilityapi.com/api/v2',
-  'https://api.utilityapi.com/v2'
-];
+// Note: Genability API requires Basic Auth with a Genability-specific API key
+// The API key should be a Genability API key (not UtilityAPI key)
+// If no valid Genability API key is provided, the system falls back to official Texas data
+// Other commercial APIs (Arcadia, UtilityAPI) require authentication and specific endpoints
+// that are not publicly documented
 
 /**
  * Fetch data from EIA API with retry logic
@@ -90,86 +83,191 @@ export async function getTexasAverageElectricityPrice(apiKey: string): Promise<n
 }
 
 /**
- * Fetch data from Energy APIs with retry logic
- * Tries multiple APIs that provide energy supplier and plan data
+ * Fetch data from Genability API with authentication
+ * Genability uses Basic Auth: API key as username, empty password
  */
-async function fetchEnergyAPIWithRetry(
+async function fetchGenabilityAPI(
   endpoint: string,
-  apiKey: string,
-  retries = 3
+  apiKey?: string,
+  retries = 2
 ): Promise<any> {
-  // Log API key status for debugging
-  const keyStatus = apiKey ? `${apiKey.substring(0, 10)}... (length: ${apiKey.length})` : 'NOT SET';
-  console.log(`🔑 API Key status: ${keyStatus}`);
+  // If no API key, skip trying Genability
+  if (!apiKey || apiKey.trim() === '') {
+    throw new Error('Genability API requires an API key');
+  }
 
-  // Try different base URLs and APIs
-  for (const baseUrl of ENERGY_API_BASES) {
-    for (let i = 0; i < retries; i++) {
-      try {
-        const url = `${baseUrl}${endpoint}`;
-        console.log(`Trying Energy API URL: ${url}`);
-        const response = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-        });
+  for (let i = 0; i < retries; i++) {
+    try {
+      const url = `https://api.genability.com/rest/public${endpoint}`;
+      
+      // Genability uses Basic Auth with API key as username and empty password
+      const authString = Buffer.from(`${apiKey}:`).toString('base64');
+      
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Basic ${authString}`,
+        },
+      });
 
-        if (!response.ok) {
-          if (response.status === 404) {
-            // Try next base URL
-            break;
-          }
-          throw new Error(`Energy API responded with status ${response.status}: ${response.statusText}`);
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          throw new Error(`API authentication failed: ${response.status} ${response.statusText}`);
         }
-
-        const data = await response.json();
-        console.log(`✅ Successfully connected to Energy API at ${baseUrl}`);
-        return data;
-      } catch (error) {
-        if (i === retries - 1 && baseUrl === ENERGY_API_BASES[ENERGY_API_BASES.length - 1]) {
-          console.error('Failed to fetch data from all Energy APIs:', error);
-          throw error;
+        if (response.status === 404) {
+          throw new Error(`Endpoint not found: ${response.status} ${response.statusText}`);
         }
-        // Exponential backoff
-        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1000));
+        throw new Error(`Genability API responded with status ${response.status}: ${response.statusText}`);
       }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (i === retries - 1) {
+        throw error;
+      }
+      // Exponential backoff
+      await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1000));
     }
   }
   return null;
 }
 
 /**
- * Fetch suppliers from UtilityAPI - Real retail energy supplier data
- * UtilityAPI provides access to current Texas retail energy suppliers
+ * Transform Genability LSE response to Supplier format
+ */
+function transformGenabilityLSEs(data: any): Supplier[] {
+  if (!data || !data.results || !Array.isArray(data.results)) {
+    return [];
+  }
+
+  return data.results
+    .filter((lse: any) => lse.state === 'TX' && lse.name)
+    .map((lse: any, index: number) => ({
+      id: lse.lseId?.toString() || `gen-${index}`,
+      name: lse.name,
+      rating: 4.0, // Default rating, could be enhanced with actual ratings if available
+    }));
+}
+
+// Removed Arcadia and UtilityAPI transform functions - these APIs are not publicly available
+// or require specific authentication that is not configured
+
+/**
+ * Transform Genability tariffs response to Plan format
+ */
+function transformGenabilityTariffs(data: any, suppliers: Supplier[]): Plan[] {
+  if (!data || !data.results || !Array.isArray(data.results)) {
+    return [];
+  }
+
+  const plans: Plan[] = [];
+  const supplierMap = new Map(suppliers.map(s => [s.name.toLowerCase(), s]));
+
+  data.results.forEach((tariff: any, index: number) => {
+    // Find matching supplier
+    const supplierName = tariff.lseName || tariff.providerName;
+    const supplier = supplierName 
+      ? supplierMap.get(supplierName.toLowerCase()) || suppliers[0]
+      : suppliers[0];
+
+    if (!supplier) return;
+
+    // Extract rate information
+    const rate = tariff.rate || tariff.price || tariff.ratePerKwh || 10.0;
+    const renewablePercentage = tariff.renewablePercentage || 
+      (tariff.greenEnergy ? 100 : 0);
+
+    const plan: Plan = {
+      id: tariff.tariffId?.toString() || `plan-${supplier.id}-${index}`,
+      supplierId: supplier.id,
+      supplierName: supplier.name,
+      name: tariff.name || tariff.tariffName || `${supplier.name} Plan ${index + 1}`,
+      rate: typeof rate === 'number' ? rate : parseFloat(rate) || 10.0,
+      renewablePercentage: typeof renewablePercentage === 'number' 
+        ? renewablePercentage 
+        : parseFloat(renewablePercentage) || 0,
+      fees: {
+        delivery: tariff.deliveryFee || 3.5,
+        admin: tariff.adminFee || 5.0,
+      },
+    };
+
+    // Add rate structure if available
+    if (tariff.rateStructure) {
+      plan.rateStructure = tariff.rateStructure;
+    }
+
+    plans.push(plan);
+  });
+
+  return plans;
+}
+
+/**
+ * Fetch suppliers from real APIs, fallback to official sources
+ * Tries Genability API if API key is provided
  */
 async function fetchSuppliersWithRetry(
   apiKey?: string,
-  retries = 3
+  retries = 2
 ): Promise<Supplier[]> {
-  // Use verified official Texas supplier data
-  // This provides reliable, up-to-date supplier information based on PUC regulatory data
-  console.log('Using verified official Texas supplier data...');
+  // Try Genability API if API key is provided
+  if (apiKey && apiKey.trim() !== '') {
+    try {
+      const genabilityData = await fetchGenabilityAPI('/lses?country=US&state=TX', apiKey, retries);
+      
+      if (genabilityData) {
+        const suppliers = transformGenabilityLSEs(genabilityData);
+        if (suppliers.length > 0) {
+          console.log(`✅ Successfully fetched ${suppliers.length} suppliers from Genability API`);
+          return suppliers;
+        }
+      }
+    } catch (error) {
+      // Silently fall back to static data - this is expected behavior
+    }
+  }
+
+  // Use fallback to official Texas supplier data
   return await getTexasSuppliersFromOfficialSources();
 }
 
 /**
- * Fetch plans from UtilityAPI - Real retail energy plan data
- * UtilityAPI provides access to current Texas retail energy plans and rates
+ * Fetch plans from real APIs, fallback to official sources
+ * Tries Genability API if API key is provided
  */
 async function fetchPlansWithRetry(
   apiKey?: string,
-  retries = 3
+  retries = 2
 ): Promise<Plan[]> {
-  // Use verified official Texas plan data
-  // This provides realistic plan structures based on PUC-filed tariffs and regulatory data
-  console.log('Using verified official Texas plan data...');
+  // First, get suppliers (needed for plan transformation)
+  const suppliers = await fetchSuppliersWithRetry(apiKey, retries);
+
+  // Try Genability API for tariffs/plans if API key is provided
+  if (apiKey && apiKey.trim() !== '') {
+    try {
+      const genabilityData = await fetchGenabilityAPI('/tariffs?country=US&state=TX&customerClasses=1', apiKey, retries);
+      
+      if (genabilityData) {
+        const plans = transformGenabilityTariffs(genabilityData, suppliers);
+        if (plans.length > 0) {
+          console.log(`✅ Successfully fetched ${plans.length} plans from Genability API`);
+          return plans;
+        }
+      }
+    } catch (error) {
+      // Silently fall back to static data - this is expected behavior
+    }
+  }
+
+  // Use fallback to official Texas plan data
   return await getTexasPlansFromOfficialSources();
 }
 
 /**
  * Get suppliers with caching
+ * @param apiKey - Genability API key (preferred), or UtilityAPI/EIA key as fallback
  */
 export async function getSuppliers(apiKey?: string): Promise<Supplier[]> {
   const now = Date.now();
@@ -178,7 +276,7 @@ export async function getSuppliers(apiKey?: string): Promise<Supplier[]> {
     return supplierCache;
   }
 
-  // Use official Texas supplier data (no API key required)
+  // Try Genability API if key provided, otherwise use fallback data
   supplierCache = await fetchSuppliersWithRetry(apiKey || '');
   cacheTimestamp = now;
   return supplierCache;
@@ -186,6 +284,7 @@ export async function getSuppliers(apiKey?: string): Promise<Supplier[]> {
 
 /**
  * Get plans with caching
+ * @param apiKey - Genability API key (preferred), or UtilityAPI/EIA key as fallback
  */
 export async function getPlans(apiKey?: string): Promise<Plan[]> {
   const now = Date.now();
@@ -194,19 +293,18 @@ export async function getPlans(apiKey?: string): Promise<Plan[]> {
     return planCache;
   }
 
-  // Use official Texas plan data (no API key required)
+  // Try Genability API if key provided, otherwise use fallback data
   planCache = await fetchPlansWithRetry(apiKey || '');
   cacheTimestamp = now;
   return planCache;
 }
 
 /**
- * Get Texas suppliers from official sources when commercial APIs fail
+ * Get Texas suppliers from official sources
  * This uses a maintained, verified list of active Texas retail electric providers
  * based on Texas PUC registration data and official regulatory filings
  */
 async function getTexasSuppliersFromOfficialSources(): Promise<Supplier[]> {
-  console.log('Using official Texas supplier data as fallback');
 
   // This is a maintained list of active Texas retail electric providers
   // Based on Texas PUC data as of 2024
@@ -230,12 +328,11 @@ async function getTexasSuppliersFromOfficialSources(): Promise<Supplier[]> {
 }
 
 /**
- * Get Texas plans from official sources when commercial APIs fail
+ * Get Texas plans from official sources
  * This uses realistic plan structures based on PUC-filed tariffs and
  * regulatory data for active Texas retail electric providers
  */
 async function getTexasPlansFromOfficialSources(): Promise<Plan[]> {
-  console.log('Using official Texas plan data as fallback');
 
   const suppliers = await getTexasSuppliersFromOfficialSources();
   const plans: Plan[] = [];

@@ -26,6 +26,7 @@ export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [recommendations, setRecommendations] = useState<Recommendation[] | null>(null);
+  const [suppliers, setSuppliers] = useState<{ id: string; rating: number }[]>([]);
   const [dataQuality, setDataQuality] = useState<'good' | 'fair' | 'poor' | undefined>();
   const [qualityScore, setQualityScore] = useState<number | undefined>();
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -38,8 +39,8 @@ export default function Home() {
       rate: 0,
     },
     preferences: {
-      costPriority: 50,
-      renewablePriority: 50,
+      costPriority: 100,
+      renewablePriority: 0,
     },
   });
 
@@ -121,6 +122,7 @@ export default function Home() {
 
       if (result.success && result.recommendations) {
         setRecommendations(result.recommendations);
+        setSuppliers(result.suppliers || []);
         setDataQuality(result.dataQuality);
         setQualityScore(result.qualityScore);
         setWarnings(result.warnings || []);
@@ -165,6 +167,7 @@ export default function Home() {
 
   const handleStartOver = () => {
     setRecommendations(null);
+    setSuppliers([]);
     setDataQuality(undefined);
     setQualityScore(undefined);
     setWarnings([]);
@@ -196,6 +199,7 @@ export default function Home() {
         <div className="space-y-6">
           <RecommendationList
             recommendations={recommendations}
+            suppliers={suppliers}
             dataQuality={dataQuality}
             qualityScore={qualityScore}
             savingToAccount={savingToAccount}

@@ -94,12 +94,8 @@ export const Step4Review: React.FC<Step4ReviewProps> = ({
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Preferences</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Cost Savings Priority:</span>
-              <span className="font-medium">{formData.preferences.costPriority}%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Renewable Energy Priority:</span>
-              <span className="font-medium">{formData.preferences.renewablePriority}%</span>
+              <span className="text-gray-600">Priority:</span>
+              <span className="font-medium">Cost Savings</span>
             </div>
           </div>
         </div>

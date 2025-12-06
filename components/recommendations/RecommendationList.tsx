@@ -9,6 +9,7 @@ import { generatePDFReport, downloadPDF } from '@/lib/pdfGenerator.client';
 
 interface RecommendationListProps {
   recommendations: Recommendation[];
+  suppliers?: { id: string; rating: number }[];
   dataQuality?: 'good' | 'fair' | 'poor';
   qualityScore?: number;
   savingToAccount?: boolean;
@@ -19,6 +20,7 @@ interface RecommendationListProps {
 
 export const RecommendationList: React.FC<RecommendationListProps> = ({
   recommendations,
+  suppliers = [],
   dataQuality,
   qualityScore,
   savingToAccount = false,
@@ -148,6 +150,7 @@ export const RecommendationList: React.FC<RecommendationListProps> = ({
             key={recommendation.plan.id}
             recommendation={recommendation}
             rank={index + 1}
+            suppliers={suppliers}
             currentPlan={currentPlan}
             usageData={usageData}
           />

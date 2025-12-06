@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card } from '../ui/Card';
 import { Alert } from '../ui/Alert';
 import { CurrentPlanData } from '@/lib/types';
+import { getSuppliers } from '@/lib/apiClients';
+import { Supplier } from '@/lib/types';
 
 interface Step2CurrentPlanProps {
   onNext: () => void;
@@ -23,6 +25,27 @@ export const Step2CurrentPlan: React.FC<Step2CurrentPlanProps> = ({
   const [errors, setErrors] = useState<Partial<Record<keyof CurrentPlanData, string>>>({});
   const [showHelp, setShowHelp] = useState(false);
   const [contractError, setContractError] = useState<string>('');
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [loadingSuppliers, setLoadingSuppliers] = useState(true);
+
+  // Fetch suppliers on mount
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        setLoadingSuppliers(true);
+        const supplierList = await getSuppliers();
+        setSuppliers(supplierList);
+      } catch (error) {
+        console.error('Error fetching suppliers:', error);
+        // Fallback to empty array - user can still type if needed
+        setSuppliers([]);
+      } finally {
+        setLoadingSuppliers(false);
+      }
+    };
+
+    fetchSuppliers();
+  }, []);
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof CurrentPlanData, string>> = {};
@@ -96,14 +119,44 @@ export const Step2CurrentPlan: React.FC<Step2CurrentPlanProps> = ({
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Input
-          label="Current Supplier"
-          value={currentPlan.supplier}
-          onChange={(e) => handleChange('supplier', e.target.value)}
-          error={errors.supplier}
-          placeholder="e.g., Reliant Energy"
-          required
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Current Supplier <span className="text-red-500">*</span>
+          </label>
+          {loadingSuppliers ? (
+            <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
+              Loading suppliers...
+            </div>
+          ) : suppliers.length > 0 ? (
+            <select
+              value={currentPlan.supplier}
+              onChange={(e) => handleChange('supplier', e.target.value)}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+                errors.supplier ? 'border-red-500' : 'border-gray-300'
+              }`}
+              required
+            >
+              <option value="">Select your current supplier</option>
+              {suppliers.map((supplier) => (
+                <option key={supplier.id} value={supplier.name}>
+                  {supplier.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <Input
+              label=""
+              value={currentPlan.supplier}
+              onChange={(e) => handleChange('supplier', e.target.value)}
+              error={errors.supplier}
+              placeholder="e.g., Reliant Energy"
+              required
+            />
+          )}
+          {errors.supplier && (
+            <p className="text-xs text-red-600 mt-1">{errors.supplier}</p>
+          )}
+        </div>
 
         <Input
           label="Current Rate (cents per kWh)"

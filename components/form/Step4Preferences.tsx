@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { Alert } from '../ui/Alert';
 import { UserPreferences } from '@/lib/types';
 
 interface Step4PreferencesProps {
@@ -19,30 +18,6 @@ export const Step4Preferences: React.FC<Step4PreferencesProps> = ({
   preferences,
   onPreferencesChange,
 }) => {
-  const [error, setError] = useState<string>('');
-
-  const handleCostChange = (value: number) => {
-    const newCost = Math.max(0, Math.min(100, value));
-    const newRenewable = 100 - newCost;
-    onPreferencesChange({
-      ...preferences,
-      costPriority: newCost,
-      renewablePriority: newRenewable,
-    });
-    setError('');
-  };
-
-  const handleRenewableChange = (value: number) => {
-    const newRenewable = Math.max(0, Math.min(100, value));
-    const newCost = 100 - newRenewable;
-    onPreferencesChange({
-      ...preferences,
-      costPriority: newCost,
-      renewablePriority: newRenewable,
-    });
-    setError('');
-  };
-
   const handlePriceStabilityChange = (value: string) => {
     onPreferencesChange({
       ...preferences,
@@ -64,97 +39,26 @@ export const Step4Preferences: React.FC<Step4PreferencesProps> = ({
     });
   };
 
-  const validate = (): boolean => {
-    const total = preferences.costPriority + preferences.renewablePriority;
-    if (Math.abs(total - 100) > 0.01) {
-      setError('Cost and renewable priorities must sum to 100%');
-      return false;
-    }
-    setError('');
-    return true;
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
-      onNext();
-    }
+    // Ensure cost priority is always 100%
+    onPreferencesChange({
+      ...preferences,
+      costPriority: 100,
+      renewablePriority: 0,
+    });
+    onNext();
   };
 
   return (
     <Card>
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Preferences</h2>
       <p className="text-gray-600 mb-6">
-        Tell us what matters most to you. Start by adjusting the sliders to prioritize cost savings
-        versus renewable energy options. Then answer the optional questions below for more personalized recommendations.
+        Answer the optional questions below for more personalized recommendations.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="text-sm font-medium text-gray-700">
-              Cost Savings Priority
-            </label>
-            <span className="text-lg font-semibold text-primary-600">
-              {preferences.costPriority.toFixed(0)}%
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value={preferences.costPriority}
-            onChange={(e) => handleCostChange(parseInt(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Prioritize plans with lower costs and better savings
-          </p>
-        </div>
-
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="text-sm font-medium text-gray-700">
-              Renewable Energy Priority
-            </label>
-            <span className="text-lg font-semibold text-green-600">
-              {preferences.renewablePriority.toFixed(0)}%
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value={preferences.renewablePriority}
-            onChange={(e) => handleRenewableChange(parseInt(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Prioritize plans with higher renewable energy percentages
-          </p>
-        </div>
-
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-700">Total:</span>
-            <span
-              className={`text-lg font-semibold ${
-                Math.abs(preferences.costPriority + preferences.renewablePriority - 100) < 0.01
-                  ? 'text-green-600'
-                  : 'text-red-600'
-              }`}
-            >
-              {(preferences.costPriority + preferences.renewablePriority).toFixed(0)}%
-            </span>
-          </div>
-        </div>
-
-        <div className="space-y-6 pt-6 border-t border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Additional Preferences</h3>
-          <p className="text-sm text-gray-600">These optional preferences help refine your recommendations further.</p>
-
+        <div className="space-y-6">
           <div>
             <label className="text-sm font-medium text-gray-700 mb-2 block">
               Price Stability
@@ -287,12 +191,6 @@ export const Step4Preferences: React.FC<Step4PreferencesProps> = ({
             </div>
           </div>
         </div>
-
-        {error && (
-          <Alert variant="error">
-            {error}
-          </Alert>
-        )}
 
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
           <Button type="button" variant="outline" onClick={onBack} className="flex-1">

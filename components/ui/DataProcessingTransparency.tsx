@@ -66,14 +66,15 @@ export const DataProcessingTransparency: React.FC<DataProcessingTransparencyProp
         return {
           title: "Usage Preferences",
           dataCollected: [
-            "Cost savings priority (percentage 0-100)",
-            "Renewable energy priority (percentage 0-100)",
-            "Must sum to 100% for validation"
+            "Price stability preference (fixed-only, variable-ok, or no-preference)",
+            "Plan complexity preference (simple-only, complex-ok, or no-preference)",
+            "Supplier reputation preference (high-only, any-ok, or no-preference)",
+            "Note: Recommendations prioritize cost savings by default"
           ],
           processing: [
-            "Validate percentages sum to 100%",
-            "Store in browser localStorage",
-            "Use as weights in recommendation algorithm"
+            "Store preferences in browser localStorage",
+            "Use preferences as weights in recommendation algorithm",
+            "Apply cost savings priority (100%) to all recommendations"
           ],
           legalBasis: "Consent (Article 6(1)(a)) for processing preferences",
           retention: "Stored temporarily in localStorage during session"
