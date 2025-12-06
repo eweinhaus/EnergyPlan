@@ -19,6 +19,8 @@ class VercelDeploymentHelper {
    */
   async checkDeploymentStatus(deploymentId = null) {
     console.log('🔍 Checking Vercel deployment status...');
+    console.log('💡 Tip: Check your Vercel dashboard at https://vercel.com/dashboard');
+    console.log('   Look under your project → Deployments for detailed error logs');
 
     // This would normally make API calls to Vercel API
     // For now, we'll simulate the process
@@ -26,6 +28,17 @@ class VercelDeploymentHelper {
     console.log('📊 Deployment Status: Building...');
     console.log('⏱️  Build Duration: ~2-3 minutes');
     console.log('🌐 Domain: https://energy-plan-mvp.vercel.app');
+
+    console.log('\n🔧 Common deployment issues to check:');
+    console.log('   1. Environment variables set in Vercel dashboard?');
+    console.log('   2. Node.js version: package.json specifies >=20.0.0');
+    console.log('   3. Check Vercel deployment logs for detailed error messages');
+    console.log('   4. Ensure build command is "npm run build"');
+    console.log('   5. Check for any peer dependency warnings');
+    console.log('\n🔍 To debug deployment issues:');
+    console.log('   - Go to vercel.com/dashboard → Your Project → Deployments');
+    console.log('   - Click on the failed deployment → View Logs');
+    console.log('   - Look for specific error messages in the build output');
 
     return {
       status: 'building',
