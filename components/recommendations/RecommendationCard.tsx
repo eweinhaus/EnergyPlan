@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
 import { PlanDetailsModal } from './PlanDetailsModal';
 import { Recommendation, CurrentPlanData, ParsedUsageData } from '@/lib/types';
 
@@ -131,44 +130,6 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
           <p className="text-sm text-gray-700 leading-relaxed">{explanation}</p>
         </div>
 
-        {/* Cost Breakdown */}
-        <div className="border-t pt-4">
-          <details className="cursor-pointer">
-            <summary className="text-sm font-medium text-gray-700 hover:text-primary-600">
-              View Cost Breakdown
-            </summary>
-            <div className="mt-3 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Energy Cost (${plan.rate}/kWh)</span>
-                <span className="font-medium">
-                  ${((plan.rate / 100) * 1000).toFixed(2)} per 1000 kWh
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Delivery Fee</span>
-                <span className="font-medium">${plan.fees.delivery.toFixed(2)}/month</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Admin Fee</span>
-                <span className="font-medium">${plan.fees.admin.toFixed(2)}/month</span>
-              </div>
-            </div>
-          </details>
-        </div>
-
-        {/* Action Button */}
-        <div className="mt-auto pt-4">
-          <Button
-            variant="primary"
-            className="w-full"
-            onClick={() => {
-              // In production, this would link to supplier signup page
-              alert(`This would redirect to ${plan.supplierName} signup page`);
-            }}
-          >
-            Learn More
-          </Button>
-        </div>
       </div>
     </div>
 
