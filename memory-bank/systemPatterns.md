@@ -22,13 +22,13 @@ Future (Phase 2): User Browser → Firebase Hosting → Firebase Functions (Next
 ```
 
 ### Component Structure
-- **Frontend**: Single-page React application with progressive form steps (6 steps)
+- **Frontend**: Single-page React application with progressive form steps (5 steps)
 - **Backend**: Next.js API routes for data processing with scenario calculations
 - **Processing**: In-memory Node.js processing with contract timing analysis
-- **Authentication**: Firebase Auth for user accounts (Phase 2)
-- **Database**: Firestore for user data, recommendations, and audit logs (Phase 2)
-- **External APIs**: EIA Open Data API for energy statistics (integrated December 2025)
-- **Supplier/Plan Data**: Static/mock data (MVP), Real retail supplier APIs (Phase 2)
+- **Authentication**: Firebase Auth for user accounts (Phase 2 - implemented, optional)
+- **Database**: Firestore for user data, recommendations, and audit logs (Phase 2 - implemented, optional)
+- **External APIs**: EIA Open Data API for energy statistics, Genability API support (integrated December 2025)
+- **Supplier/Plan Data**: Static/mock data (MVP), Genability API support (requires Arcadia subscription)
 - **Scenario Engine**: Cost analysis with Stay Current, Switch Now, Wait & Switch calculations
 
 ## Key Technical Decisions
@@ -110,10 +110,10 @@ XML File → Parse (fast-xml-parser) → Validate → Aggregate → Calculate Co
 page.tsx (Main)
 ├── ProgressBar
 ├── Step1Welcome
-├── Step2CurrentPlan
+├── Step2CurrentPlan (includes contract details: earlyTerminationFee, contractEndDate)
 ├── Step3FileUpload
 ├── Step4Preferences
-├── Step5Review
+├── Step4Review (Step 5 - final review)
 └── RecommendationList (after processing)
     └── RecommendationCard (×3)
 ```

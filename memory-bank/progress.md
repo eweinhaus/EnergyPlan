@@ -9,7 +9,7 @@
 - **Main Page**: Single-page application with complete step-based navigation (`app/page.tsx`)
 - **Form Steps**: All 5 form steps fully implemented and functional
   - Step 1: Welcome screen with value proposition
-  - Step 2: Current plan details form with contract information and validation
+  - Step 2: Current plan details form with contract information (early termination fee, end date) and validation
   - Step 3: File upload with drag-and-drop and XML validation
   - Step 4: Preferences with cost/renewable sliders + optional advanced preferences
   - Step 5: Review and submit with processing indicators
@@ -134,16 +134,20 @@
 ### 🚀 Post-MVP Enhancements (Future Phases)
 
 #### Phase 2 Features
-- [ ] **User Accounts**: Firebase Authentication with Email/Password and Google providers
-- [ ] **Database Integration**: Firestore for user data, recommendations, and audit logs
-- [ ] **Firebase Hosting**: Migrate from Render to Firebase Hosting with Functions
-- [ ] **Data Persistence**: User profiles, saved recommendations, usage data history
-- [ ] **GDPR Compliance**: Data export, deletion, and consent management via Firestore
+- [x] **User Accounts**: ✅ Firebase Authentication implemented (Email/Password and Google providers) - requires Firebase config
+- [x] **Database Integration**: ✅ Firestore integration complete (user data, recommendations, audit logs) - requires Firebase config
+- [x] **Data Persistence**: ✅ User profiles, saved recommendations, usage data history implemented - requires Firebase config
+- [x] **GDPR Compliance**: ✅ Data export, deletion, and consent management APIs implemented - requires Firebase config
+- [x] **User Dashboard**: ✅ Dashboard page for viewing saved recommendations - requires Firebase config
+- [ ] **Firebase Hosting**: Migrate from Vercel to Firebase Hosting with Functions (optional)
 - [ ] **Multi-State Support**: NY, IL, PA market expansion
 - [ ] **Advanced Rate Structures**: Tiered, TOU, variable rates
 - [x] **EIA API Integration**: ✅ EIA Open Data API integrated (December 2025)
+- [x] **Genability API Integration**: ✅ Genability API integration code complete (requires Arcadia subscription)
 - [ ] **Retail Supplier API**: Replace static supplier/plan data with real retail energy supplier API
 - [ ] **Advanced Analytics**: Usage pattern analysis and insights
+
+**Note**: Phase 2 features are code-complete but require Firebase environment variables to be configured. The application works fully in MVP mode (single-session, no persistence) without Firebase configuration.
 
 #### Phase 3 Features
 - [ ] **ML-Enhanced Recommendations**: Machine learning for better predictions
@@ -160,12 +164,13 @@
 - [ ] **Error Tracking**: Sentry integration for production errors
 
 #### Infrastructure Enhancements
-- [x] **Firebase Setup**: Complete Firebase configuration and deployment scripts ready
-- [ ] **Firestore Migration**: Migrate from in-memory to Firestore persistence
-- [ ] **Firebase Functions**: Implement Cloud Functions for Next.js SSR
-- [ ] **Firebase Hosting**: Migrate from Render to Firebase Hosting
-- [ ] **Budget Monitoring**: $20/month Firebase budget with automated alerts
-- [ ] **Security Rules**: Firestore security rules for data access control
+- [x] **Firebase Setup**: ✅ Complete Firebase configuration and deployment scripts ready
+- [x] **Firestore Integration**: ✅ Firestore persistence implemented (requires Firebase config)
+- [x] **Security Rules**: ✅ Firestore security rules implemented (`firestore.rules`)
+- [x] **Vercel Migration**: ✅ Successfully migrated from Render to Vercel ($0/month)
+- [ ] **Firebase Functions**: Implement Cloud Functions for Next.js SSR (optional)
+- [ ] **Firebase Hosting**: Migrate from Vercel to Firebase Hosting (optional)
+- [ ] **Budget Monitoring**: $20/month Firebase budget with automated alerts (when Firebase enabled)
 - [ ] **Database**: PostgreSQL + TimescaleDB for additional analytics (if needed)
 - [ ] **Caching**: Redis for frequently accessed data
 - [ ] **Background Jobs**: Queue-based processing for heavy operations

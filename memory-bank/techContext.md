@@ -55,14 +55,31 @@ npm run dev
 ```env
 # .env.local
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-EIA_API_KEY=your_eia_api_key_here  # EIA Open Data API key (get from https://www.eia.gov/opendata/register.php)
-# Legacy support: UTILITY_API_KEY can be used as fallback if EIA_API_KEY is not set
+
+# EIA API (FREE - Recommended for energy statistics)
+EIA_API_KEY=your_eia_api_key_here  # Get from https://www.eia.gov/opendata/register.php
+
+# Genability API (Optional - requires Arcadia subscription)
+GENABILITY_API_KEY=your_genability_api_key_here  # See GENABILITY_API_SETUP.md
+
+# Legacy support: UTILITY_API_KEY can be used as fallback
+UTILITY_API_KEY=your_utility_api_key_here
+
+# Firebase Configuration (Optional - for Phase 2 features)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 ```
 
 **Note**: 
 - EIA API provides statistical energy data (not retail supplier/plan catalogs)
+- Genability API requires Arcadia subscription (see GENABILITY_API_SETUP.md)
 - Supplier and plan data are currently static/mock data
 - For MVP testing, the application uses mock data if API keys are not provided
+- Firebase configuration is optional - app works fully without it (MVP mode)
 
 ## Project Structure
 
@@ -233,6 +250,17 @@ node monitor-deployment.js [command]
 - **Note**: EIA provides aggregate statistical data, not retail supplier/plan catalogs
 - **Implementation**: `lib/apiClients.ts` includes `fetchEIAWithRetry()` and `getTexasAverageElectricityPrice()` functions
 
+### Genability API (Arcadia)
+- **Purpose**: Energy tariff and supplier data (now part of Arcadia platform)
+- **Authentication**: API key via environment variable (`GENABILITY_API_KEY`) with Basic Auth
+- **Base URL**: Genability API endpoints (now accessed through Arcadia)
+- **Documentation**: https://docs.arcadia.com
+- **Registration**: Requires Arcadia subscription (contact Arcadia sales)
+- **Status**: ✅ Integration code complete (December 2025), requires Arcadia subscription for API access
+- **Note**: Genability was acquired by Arcadia in 2021 - API access requires Arcadia subscription
+- **Implementation**: `lib/apiClients.ts` includes `fetchGenabilityAPI()`, `transformGenabilityLSEs()`, and `transformGenabilityTariffs()` functions
+- **Setup Guide**: See `GENABILITY_API_SETUP.md` for detailed setup instructions
+
 ### Supplier & Plan Data
 - **Current Status**: Static/mock data (EIA doesn't provide retail supplier catalogs)
 - **Location**: Defined in `lib/apiClients.ts`
@@ -249,11 +277,11 @@ node monitor-deployment.js [command]
 
 ### Hosting Platform
 - **Current (MVP)**: Vercel (migrated from Render - $0/month vs $7/month)
-- **Deployment**: Successfully deployed and live in production
-- **Configuration**: `render.yaml` file included
+- **Deployment**: Successfully deployed and live in production at https://EnergyPlan.vercel.app
+- **Configuration**: Vercel automatic deployments via GitHub integration
 - **Environment**: Production environment variables configured and active
-- **Future (Phase 2)**: Firebase Hosting with Firestore and Authentication
-- **Firebase Setup**: Complete configuration files ready for Phase 2 deployment
+- **Future (Phase 2)**: Optional migration to Firebase Hosting (currently on Vercel)
+- **Firebase Setup**: Complete configuration files ready (Firebase Auth and Firestore implemented, requires config)
 
 ### Build Configuration
 - **Build Command**: `npm run build`

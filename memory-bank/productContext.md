@@ -24,12 +24,11 @@ The MVP addresses this by providing a simple, focused tool that processes real u
 
 ### Enhanced User Journey
 1. **Welcome**: User sees value proposition and provides privacy consent
-2. **Current Plan**: User enters existing plan details (supplier, rate, contract info)
+2. **Current Plan**: User enters existing plan details (supplier, rate) and optional contract information (early termination fee, contract end date)
 3. **Upload XML**: User uploads Green Button XML file with usage history
 4. **Preferences**: User sets priorities for cost savings vs renewable energy + optional advanced preferences
-5. **Contract Details** (Optional): User provides early termination fee and contract end date for enhanced analysis
-6. **Review**: User reviews entered information and submits
-7. **Enhanced Results**: User sees top 3 personalized recommendations with **three cost scenarios** (Stay Current, Switch Now, Wait & Switch)
+5. **Review**: User reviews entered information and submits
+6. **Enhanced Results**: User sees top 3 personalized recommendations with **three cost scenarios** (Stay Current, Switch Now, Wait & Switch)
 
 ### Core Workflow
 ```
@@ -44,10 +43,11 @@ User Input → XML Processing → Usage Analysis → Plan Matching → Recommend
 ## User Experience Goals
 
 ### Simplicity
-- **Single Page Application**: No routing, progressive form steps
+- **Single Page Application**: No routing, progressive form steps (5 steps)
 - **Clean, Simple UI**: Focus on essential information without clutter
 - **Mobile-First**: Responsive design for mobile devices
 - **Clear Visual Hierarchy**: Easy to scan and understand
+- **Streamlined Flow**: Contract details integrated into current plan step for logical grouping
 
 ### Trust & Transparency
 - **Clear Explanations**: Simple language describing why each plan was recommended

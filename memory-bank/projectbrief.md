@@ -19,10 +19,10 @@ The **AI Energy Plan Recommendation Agent MVP** is a single-page web application
 - Prefer simple, focused recommendations over complex analysis
 
 ### Key Features (MVP Scope)
-1. **5-Step Progressive Form**: Collects current plan details, usage data, and preferences
+1. **5-Step Progressive Form**: Collects current plan details (including optional contract information), usage data, and preferences
 2. **Green Button XML Processing**: Parses ESPI format XML files to extract usage data
 3. **Personalized Recommendations**: Generates top 3 energy plan recommendations based on usage patterns and preferences
-4. **Cost Calculations**: Accurate annual cost projections with savings estimates
+4. **Cost Calculations**: Accurate annual cost projections with savings estimates and three cost scenarios (Stay Current, Switch Now, Wait & Switch)
 5. **Mobile Responsive**: Works seamlessly on mobile, tablet, and desktop devices
 
 ## Success Criteria
@@ -78,11 +78,11 @@ The **AI Energy Plan Recommendation Agent MVP** is a single-page web application
 ## Key Constraints
 
 - **Technology**: Next.js 14+ with App Router, TypeScript, Tailwind CSS
-- **Runtime**: Node.js 18.17+
+- **Runtime**: Node.js 20+ (LTS)
 - **Hosting**: Vercel (migrated from Render - $7/month → $0/month cost savings)
 - **File Size**: Maximum 10MB XML files
 - **Data Requirements**: Minimum 6 months of usage data required
-- **API Dependencies**: EIA Open Data API (integrated December 2025), static supplier/plan data (EIA doesn't provide retail catalogs)
+- **API Dependencies**: EIA Open Data API (integrated December 2025), Genability API support (requires Arcadia subscription), static supplier/plan data (EIA doesn't provide retail catalogs)
 
 ## Future Roadmap
 
