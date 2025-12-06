@@ -15,3 +15,4 @@ if (!hasFirebaseConfig) {
 } else {
   console.log('🔄 Auth loading should proceed - Firebase config present');
 }
+

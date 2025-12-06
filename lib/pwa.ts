@@ -197,3 +197,4 @@ export class OfflineManager {
 
 export const offlineManager = OfflineManager.getInstance();
 
+

@@ -58,3 +58,4 @@ export const BatteryIcon: React.FC<BatteryIconProps> = ({
     </svg>
   );
 };
+

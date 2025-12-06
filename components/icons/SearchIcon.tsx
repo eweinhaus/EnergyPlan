@@ -36,3 +36,4 @@ export const SearchIcon: React.FC<SearchIconProps> = ({
     </svg>
   );
 };
+

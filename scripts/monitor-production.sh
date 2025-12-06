@@ -25,3 +25,4 @@ echo "🚨 Stay within $20/month Firebase budget:"
 echo "- Monitor Firestore reads/writes daily"
 echo "- Watch for unusual spikes in usage"
 echo "- Optimize queries if approaching limits"
+
