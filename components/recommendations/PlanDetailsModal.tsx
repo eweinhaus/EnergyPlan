@@ -312,7 +312,6 @@ export const PlanDetailsModal: React.FC<PlanDetailsModalProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-sm text-blue-800">Supplier</span>
               <span className="text-sm font-medium text-blue-900">{plan.supplierName}</span>
-              </div>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-blue-800">Plan Type</span>
