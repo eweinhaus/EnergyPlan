@@ -38,6 +38,19 @@ The Energy Plan Recommendation Agent MVP is **COMPLETE, DEPLOYED, AND LIVE** in 
 - TypeScript compilation successful with no errors
 - Form validation and state management working correctly
 
+### ✅ Removed Cost Breakdown Features (December 2025)
+
+**Changes Implemented:**
+- **Removed Card Cost Breakdown**: Eliminated the expandable "View Cost Breakdown" section from recommendation cards that showed energy cost, delivery fee, and admin fee details
+- **Removed Modal Cost Breakdown**: Removed the "Estimated Monthly Costs" table from the PlanDetailsModal that displayed month-by-month cost projections
+- **Cleaned Up Code**: Removed the `calculateMonthlyBreakdown()` function and related logic that was no longer needed
+
+**Rationale:**
+- Simplifies the user interface by removing complex cost breakdown details
+- Reduces cognitive load for users focused on high-level recommendations
+- Maintains focus on core value proposition: clear, actionable plan recommendations
+- Keeps essential information (annual cost, savings, rate) while removing granular breakdowns
+
 **Next Steps:**
 - Deploy via Vercel GitHub integration (automatic)
 - Monitor user feedback on improved preference matching

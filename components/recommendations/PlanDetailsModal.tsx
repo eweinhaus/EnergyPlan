@@ -3,7 +3,7 @@
 import React from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { Recommendation, CurrentPlanData, ParsedUsageData } from '@/lib/types';
+import { Recommendation, CurrentPlanData, ParsedUsageData, SUPPLIER_SIGNUP_URLS } from '@/lib/types';
 
 interface PlanDetailsModalProps {
   isOpen: boolean;
@@ -303,8 +303,9 @@ export const PlanDetailsModal: React.FC<PlanDetailsModalProps> = ({
             variant="primary"
             className="flex-1 text-sm py-2"
             onClick={() => {
-              // In production, this would link to supplier signup page
-              alert(`This would redirect to ${plan.supplierName} signup page with plan ${plan.name}`);
+              // Redirect to supplier signup page
+              const signupUrl = SUPPLIER_SIGNUP_URLS[plan.supplierName] || SUPPLIER_SIGNUP_URLS.default;
+              window.open(signupUrl, '_blank');
             }}
           >
             Sign Up for This Plan

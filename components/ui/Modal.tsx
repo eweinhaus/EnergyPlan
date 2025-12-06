@@ -54,14 +54,14 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Modal container */}
       <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
         <div
-          className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg ${className}`}
+          className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-4 sm:w-full sm:max-w-lg ${className}`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+          <div className="bg-white px-4 pb-3 pt-4 sm:p-4 sm:pb-3">
             <div className="flex items-center justify-between">
               <h3
-                className="text-lg font-semibold leading-6 text-gray-900"
+                className="text-base font-semibold leading-5 text-gray-900 truncate pr-2"
                 id="modal-title"
               >
                 {title}
@@ -91,7 +91,7 @@ export const Modal: React.FC<ModalProps> = ({
           </div>
 
           {/* Content */}
-          <div className="bg-white px-4 pb-4 sm:p-6 sm:pt-0">{children}</div>
+          <div className="bg-white px-4 pb-4 sm:p-4 sm:pt-0">{children}</div>
         </div>
       </div>
     </div>

@@ -45,7 +45,22 @@ export interface Supplier {
   id: string;
   name: string;
   rating: number; // 1-5
+  signupUrl?: string; // URL for enrolling with this supplier
 }
+
+// Signup URL mapping for Texas energy suppliers
+export const SUPPLIER_SIGNUP_URLS: Record<string, string> = {
+  'Reliant Energy': 'https://www.powertochoose.org/',
+  'TXU Energy': 'https://www.powertochoose.org/',
+  'Direct Energy': 'https://www.powertochoose.org/',
+  'Green Mountain Energy': 'https://www.powertochoose.org/',
+  'Cirro Energy': 'https://www.powertochoose.org/',
+  'Champion Energy': 'https://www.powertochoose.org/',
+  'Gexa Energy': 'https://www.powertochoose.org/',
+  'Just Energy': 'https://www.powertochoose.org/',
+  // Default fallback for any supplier not listed
+  'default': 'https://www.powertochoose.org/'
+};
 
 export interface Plan {
   id: string;
