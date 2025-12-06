@@ -222,7 +222,6 @@ describe('Firestore Data Operations', () => {
         {
           plan: { id: 'plan-1', name: 'Test Plan' },
           explanation: 'Test explanation',
-          confidence: 'high',
         },
       ];
 

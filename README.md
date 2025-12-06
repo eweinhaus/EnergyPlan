@@ -87,7 +87,7 @@ npm start
     /Step2CurrentPlan.tsx
     /Step3FileUpload.tsx
     /Step4Preferences.tsx
-    /Step5Review.tsx
+    /Step4Review.tsx
   /recommendations            # Results display components
     /RecommendationCard.tsx
     /RecommendationList.tsx
@@ -117,8 +117,8 @@ npm start
 ## API Integration
 
 The application integrates with:
-- **UtilityAPI**: For Texas supplier data
-- **Arcadia API**: For plan catalog data
+- **EIA API**: For energy statistics and market data
+- **Official Texas Data**: Verified supplier and plan data from PUC regulatory records
 
 For MVP testing, mock data is used if API keys are not configured. Update the API client implementations in `/lib/apiClients.ts` to use real endpoints.
 
@@ -144,7 +144,7 @@ The application includes:
    - Enter current plan details in Step 2
    - Upload the `sample-green-button.xml` file in Step 3
    - Set preferences in Step 4
-   - Submit in Step 5
+   - Submit in Step 4
 4. Verify that recommendations are generated without errors
 
 ### XML Parser

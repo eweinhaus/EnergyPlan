@@ -57,7 +57,7 @@ export const DataProcessingTransparency: React.FC<DataProcessingTransparencyProp
             "Parse XML file using fast-xml-parser",
             "Extract hourly usage data and aggregate to monthly totals",
             "Validate data quality and completeness",
-            "Assess data reliability and confidence scores"
+            "Assess data reliability and quality"
           ],
           legalBasis: "Consent (Article 6(1)(a)) - explicit consent required for processing personal energy data",
           retention: "File processed in server memory, deleted immediately after recommendations generated. No permanent storage."

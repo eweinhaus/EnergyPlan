@@ -99,7 +99,6 @@ describe('Phase 2 Complete User Flow Integration', () => {
             score: 0.8,
           },
           explanation: 'This plan saves you $100 annually.',
-          confidence: 'high',
         },
       ];
 
@@ -212,7 +211,6 @@ describe('Phase 2 Complete User Flow Integration', () => {
             score: 0.8,
           },
           explanation: 'This plan saves you $100 annually.',
-          confidence: 'high',
         },
       ];
 
@@ -318,8 +316,9 @@ describe('Phase 2 Complete User Flow Integration', () => {
     });
 
     test('offline manager tracks connectivity', () => {
-      const { offlineManager } = require('../lib/pwa');
+      const { getOfflineManager } = require('../lib/pwa');
 
+      const offlineManager = getOfflineManager();
       const isOnline = offlineManager.getIsOnline();
 
       expect(typeof isOnline).toBe('boolean');
@@ -366,7 +365,6 @@ describe('Phase 2 Complete User Flow Integration', () => {
             score: 0.85,
           },
           explanation: 'This plan offers excellent savings with renewable energy.',
-          confidence: 'high',
         },
       ];
 
@@ -383,7 +381,7 @@ describe('Phase 2 Complete User Flow Integration', () => {
       const exportedData = await exportUserData('journey-user');
       expect(exportedData).toHaveProperty('recommendations');
 
-      // Step 5: Generate PDF
+      // Step 4: Generate PDF
       const { generatePDFReport } = require('../lib/pdfGenerator');
       const pdfResult = await generatePDFReport(recommendations, formData);
       expect(pdfResult.success).toBe(true);

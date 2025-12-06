@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { BatteryIcon } from '../icons/BatteryIcon';
 
 interface Step1WelcomeProps {
   onNext: () => void;
@@ -26,8 +25,7 @@ export const Step1Welcome: React.FC<Step1WelcomeProps> = ({
     <Card>
       <div className="max-w-2xl mx-auto text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          <BatteryIcon className="inline mr-2 text-primary-600" size={32} />
-          Find Your Perfect Energy Plan - UPDATED
+          Find Your Perfect Energy Plan
         </h1>
         <p className="text-lg text-gray-600 mb-8">
           Upload your Green Button XML usage data and get personalized recommendations

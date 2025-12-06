@@ -98,16 +98,3 @@ export function calculateDataQualityScore(data: ParsedUsageData): number {
   return Math.max(0, Math.min(100, score));
 }
 
-/**
- * Get confidence level based on data quality score
- */
-export function getConfidenceLevel(score: number): 'high' | 'medium' | 'low' {
-  if (score >= 80) {
-    return 'high';
-  } else if (score >= 50) {
-    return 'medium';
-  } else {
-    return 'low';
-  }
-}
-

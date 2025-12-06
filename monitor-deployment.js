@@ -205,7 +205,7 @@ async function monitorUserBehavior() {
     console.log('   Step 2 Completion: Use logs to track current plan form submissions');
     console.log('   Step 3 Completion: Use logs to track file upload success');
     console.log('   Step 4 Completion: Use logs to track preferences setting');
-    console.log('   Step 5 Completion: Use logs to track final submissions');
+    console.log('   Step 4 Completion: Use logs to track final submissions');
 
     console.log('\n📈 Usage Patterns to Monitor:');
     console.log('   - Form completion rates by step');
@@ -216,7 +216,7 @@ async function monitorUserBehavior() {
 
     console.log('\n🎯 Key Metrics to Track:');
     console.log('   - Average session duration');
-    console.log('   - Completion rate (Step 1 → Step 5)');
+    console.log('   - Completion rate (Step 1 → Step 4)');
     console.log('   - Error recovery success rate');
     console.log('   - Mobile vs desktop usage');
 

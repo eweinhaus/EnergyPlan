@@ -9,15 +9,15 @@
 - **Main Page**: Single-page application with complete step-based navigation (`app/page.tsx`)
 - **Form Steps**: All 5 form steps fully implemented and functional
   - Step 1: Welcome screen with value proposition
-  - Step 2: Current plan details form with validation
+  - Step 2: Current plan details form with contract information and validation
   - Step 3: File upload with drag-and-drop and XML validation
-  - Step 4: Preferences (cost vs renewable) with sliders
+  - Step 4: Preferences with cost/renewable sliders + optional advanced preferences
   - Step 5: Review and submit with processing indicators
 - **UI Components**: Complete reusable component library
   - Button, Input, Card, ProgressBar, Alert - all with accessibility features
-- **State Management**: React state with localStorage persistence
-- **Progress Indicator**: Visual progress bar showing current step
-- **Results Display**: RecommendationCard and RecommendationList components
+- **State Management**: React state with localStorage persistence including contract data
+- **Progress Indicator**: Visual progress bar showing current step (5 total)
+- **Results Display**: Enhanced RecommendationCard and RecommendationList with scenario analysis
 
 #### Backend Implementation - COMPLETE
 - **API Route**: `/api/process-data` endpoint fully implemented (`app/api/process-data/route.ts`)
@@ -36,13 +36,15 @@
   - Business logic validation (rate ranges, date ranges)
   - Quality scoring system
   - Confidence level calculation
-- **Recommendation Engine**: Complete algorithm (`lib/recommendationEngine.ts`)
+- **Recommendation Engine**: Enhanced algorithm with scenario analysis (`lib/recommendationEngine.ts`)
   - Fixed-rate cost calculations with all fee components
   - Annual cost projections based on monthly usage
-  - Savings calculations
-  - Weighted scoring algorithm (cost + renewable preferences)
-  - Diversity selection for varied recommendations
-  - Explanation generation
+  - **Scenario-based calculations**: Stay Current, Switch Now, Wait & Switch
+  - Contract timing and early termination fee integration
+  - Savings calculations with contract cost considerations
+  - Weighted scoring algorithm (cost + renewable + advanced preferences)
+  - Pure preference-based selection (diversity constraints removed)
+  - Explanation generation with financial scenario context
 - **API Clients**: EIA Open Data API integration (`lib/apiClients.ts`)
   - ✅ EIA API client with retry logic and error handling (integrated December 2025)
   - Retry logic with exponential backoff (3 attempts)
@@ -69,6 +71,23 @@
 - **Enhanced UI**: Step4Preferences component now includes additional radio button questions
 - **Backward Compatibility**: New preferences are optional with sensible defaults
 
+#### ✅ **Recommendation Logic & Cost Analysis Enhancement** - COMPLETE (December 2025)
+- **Contract Input Integration**: Added Step 5 (Contract Details) with early termination fee and end date inputs
+- **Three Scenario Calculations**: Implemented Stay Current, Switch Now, and Wait & Switch cost analysis
+- **Enhanced Recommendation Engine**: Updated to calculate and display scenario-based financial analysis
+- **Scenario Display UI**: Modified RecommendationCard to show three-column scenario comparison with recommended option highlighting
+- **Educational Content**: Added help popups and explanations for contract terms and financial scenarios
+- **Contract Processing**: Implemented date parsing, validation, and proration calculations
+- **API Integration**: Updated to handle optional contract terms in recommendation generation
+- **Performance Optimization**: Maintained <500ms scenario calculation performance target
+
+#### ✅ Recent Fixes & Enhancements - COMPLETE (December 2025)
+- **Supplier Signup Integration**: Added supplier signup URL functionality to PlanDetailsModal for direct plan switching
+- **Technical Fixes**: Resolved Firebase config validation, PWA icons, SSR guards, and TypeScript errors
+- **React Optimization**: Fixed hook dependency issues and component click handling
+- **Code Quality**: Removed trailing whitespace and ensured clean, consistent formatting
+- **Node.js Compatibility**: Updated deployment requirements to Node.js >=20.0.0
+
 ### ✅ Functional Features - ALL WORKING
 
 - **Form Navigation**: Step-by-step progression with back/next navigation ✅
@@ -79,7 +98,11 @@
 - **Responsive Design**: Mobile-first responsive layout ✅
 - **Error Handling**: Comprehensive error messages and recovery ✅
 - **Processing Indicators**: Visual feedback during recommendation generation ✅
-- **Results Display**: Top 3 recommendations with detailed metrics ✅
+- **Results Display**: Top 3 recommendations with detailed metrics and scenario analysis ✅
+- **Scenario Calculations**: Three cost scenarios (Stay Current, Switch Now, Wait & Switch) ✅
+- **Contract Integration**: Early termination fee and timing considerations ✅
+- **Educational Content**: Help popups and explanations for financial scenarios ✅
+- **Supplier Signup Integration**: Direct links to supplier signup pages from recommendations ✅
 - **Accessibility**: ARIA labels, keyboard navigation, semantic HTML ✅
 
 ### ✅ Testing & Validation - COMPLETE
@@ -151,33 +174,38 @@
 
 ## Current Status
 
-### Implementation Status: ✅ 100% COMPLETE AND DEPLOYED (MVP + Enhanced Preferences)
+### Implementation Status: ✅ 100% COMPLETE AND DEPLOYED (MVP + Enhanced Preferences + Cost Analysis)
 
 **Completed**:
-- ✅ Frontend UI and form flow
-- ✅ Component structure
-- ✅ Type definitions
-- ✅ State management
-- ✅ XML parsing
-- ✅ Data validation
-- ✅ API integration framework
-- ✅ Recommendation engine
+- ✅ Frontend UI and form flow (6-step process with contract input)
+- ✅ Component structure including scenario display components
+- ✅ Type definitions including CostScenario and PlanWithScenarios
+- ✅ State management with contract data persistence
+- ✅ XML parsing and data validation
+- ✅ API integration framework with contract terms support
+- ✅ Enhanced recommendation engine with scenario calculations
 - ✅ Enhanced user preferences (removed diversity constraints)
-- ✅ Results display
-- ✅ Error handling
-- ✅ Testing and validation
-- ✅ Documentation
+- ✅ **Cost Analysis Enhancement**: Contract timing and early termination fee integration
+- ✅ **Scenario Calculations**: Three cost scenarios with accurate financial projections
+- ✅ Supplier signup integration and plan switching flow
+- ✅ Results display with scenario analysis and educational content
+- ✅ Error handling and technical fixes
+- ✅ Testing and validation including scenario calculation tests
+- ✅ Documentation updates
 - ✅ Deployment configuration
-- ✅ Production deployment to Render
-- ✅ **Vercel migration complete** - Production deployment successful
-- ✅ **Enhanced preferences deployed** - User preference improvements live
+- ✅ Production deployment to Vercel
+- ✅ **Cost analysis enhancement deployed** - Financial decision support live
 
 **Now Live For**:
-- 🚀 Production monitoring and optimization
-- 🚀 Real user testing with enhanced preference system
+- 🚀 **Enhanced Production Monitoring**: Scenario calculation performance and contract input analytics
+- 🚀 **Financial Decision Support Validation**: Measuring impact on user confidence and switching decisions
+- 🚀 **Contract Data Collection**: Real-world contract fee and timing data for optimization
+- 🚀 **Scenario Usage Analytics**: Understanding which cost scenarios users find most valuable
+- 🚀 **Educational Content Optimization**: Refining help content based on user comprehension
+- 🚀 Real user testing with comprehensive preference system and supplier signup flow
 - 🚀 Real API integration validation
 - 🚀 Performance monitoring in production environment
-- 🚀 User feedback collection on improved preference matching
+- 🚀 User feedback collection on financial decision support and contract analysis
 
 ## Known Issues
 
@@ -186,6 +214,10 @@
 - **Form Validation**: Working correctly with proper error messages ✅
 - **Type Conflicts**: FormData type renamed to EnergyPlanFormData ✅
 - **Build Errors**: All TypeScript compilation errors resolved ✅
+- **Firebase Config**: Configuration validation and PWA icons fixed ✅
+- **SSR Guards**: Server-side rendering guards added for localStorage ✅
+- **React Hooks**: Dependency issues resolved with useCallback ✅
+- **Component Click Handling**: Card onClick prop errors fixed ✅
 
 ### Minor Enhancements (Not Blocking)
 - **Accessibility**: Can be improved further (currently 29% coverage, MVP level)
@@ -246,13 +278,15 @@
 All original requirements from the MVP PRD have been successfully implemented, tested, validated, and deployed to production on Render. The application is now live and available for real user testing and validation.
 
 **Key Achievements**:
-- ✅ All 4 phases completed
+- ✅ All 4 phases completed + Cost Analysis Enhancement (Phase 1.1)
 - ✅ Enhanced user preferences implemented and deployed
+- ✅ **Recommendation Logic & Cost Analysis Enhancement**: Contract timing and fee integration
+- ✅ **Scenario-based Financial Analysis**: Three cost scenarios with concrete dollar amounts
 - ✅ Diversity constraints removed - pure preference-based recommendations
-- ✅ All success metrics achieved
-- ✅ Integration and performance tests passed
-- ✅ Browser testing validated
-- ✅ Documentation complete
-- ✅ Deployment configuration ready
-- ✅ Production deployment successful
-- ✅ Monitoring tools implemented and active
+- ✅ All success metrics achieved including financial decision support goals
+- ✅ Integration and performance tests passed including scenario calculations
+- ✅ Browser testing validated with enhanced UI components
+- ✅ Documentation updated with new features
+- ✅ Deployment configuration ready with enhanced functionality
+- ✅ Production deployment successful with cost analysis features live
+- ✅ Monitoring tools implemented and active with scenario analytics

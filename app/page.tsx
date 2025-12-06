@@ -12,7 +12,7 @@ import { Step1Welcome } from '@/components/form/Step1Welcome';
 import { Step2CurrentPlan } from '@/components/form/Step2CurrentPlan';
 import { Step3FileUpload } from '@/components/form/Step3FileUpload';
 import { Step4Preferences } from '@/components/form/Step4Preferences';
-import { Step5Review } from '@/components/form/Step5Review';
+import { Step4Review } from '@/components/form/Step4Review'; // Now step 4
 import { RecommendationList } from '@/components/recommendations/RecommendationList';
 import { EnergyPlanFormData, Recommendation } from '@/lib/types';
 import { setupUnloadDataDeletion } from '@/lib/dataDeletion';
@@ -88,6 +88,7 @@ export default function Home() {
     setFormData({ ...formData, preferences });
   };
 
+
   const handleSubmit = async () => {
     setIsProcessing(true);
     setError(null);
@@ -96,6 +97,12 @@ export default function Home() {
       const submitData = new FormData();
       submitData.append('currentPlan', JSON.stringify(formData.currentPlan));
       submitData.append('preferences', JSON.stringify(formData.preferences));
+      if (formData.currentPlan.earlyTerminationFee !== undefined) {
+        submitData.append('earlyTerminationFee', formData.currentPlan.earlyTerminationFee.toString());
+      }
+      if (formData.currentPlan.contractEndDate) {
+        submitData.append('contractEndDate', formData.currentPlan.contractEndDate);
+      }
       if (formData.xmlFile) {
         submitData.append('xmlFile', formData.xmlFile);
       }
@@ -217,7 +224,7 @@ export default function Home() {
             <button
               onClick={() => {
                 setError(null);
-                setCurrentStep(5);
+                setCurrentStep(4);
               }}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
             >
@@ -283,7 +290,7 @@ export default function Home() {
       case 5:
         return (
           <div className="space-y-4">
-            <Step5Review
+            <Step4Review
               onBack={handleBack}
               formData={formData}
               onSubmit={handleSubmit}

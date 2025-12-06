@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from './Button';
 
 interface ConsentBannerProps {
@@ -16,6 +16,7 @@ export interface ConsentState {
 
 const CONSENT_STORAGE_KEY = 'gdpr-consent';
 const CONSENT_VERSION = '1.0';
+const CONSENT_BANNER_SHOWN_KEY = 'consent-banner-shown';
 
 export const ConsentBanner: React.FC<ConsentBannerProps> = ({ onConsent }) => {
   const [showBanner, setShowBanner] = useState(false);
@@ -26,8 +27,13 @@ export const ConsentBanner: React.FC<ConsentBannerProps> = ({ onConsent }) => {
     dataProcessing: false,
     marketing: false,
   });
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
+    // Only check once on initial mount - never show again after first check
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+    
     // Check if user has already made a choice
     const storedConsent = localStorage.getItem(CONSENT_STORAGE_KEY);
     if (storedConsent) {
@@ -43,8 +49,15 @@ export const ConsentBanner: React.FC<ConsentBannerProps> = ({ onConsent }) => {
       }
     }
 
-    // Show banner if no valid consent found
+    // Check if banner has already been shown this session
+    const bannerShown = sessionStorage.getItem(CONSENT_BANNER_SHOWN_KEY);
+    if (bannerShown === 'true') {
+      return;
+    }
+
+    // Show banner only on initial app load if no valid consent found
     setShowBanner(true);
+    sessionStorage.setItem(CONSENT_BANNER_SHOWN_KEY, 'true');
   }, [onConsent]);
 
   const saveConsent = (newConsent: ConsentState) => {

@@ -76,6 +76,10 @@ export const showUpdateNotification = () => {
 };
 
 export const checkOnlineStatus = (): boolean => {
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined' || !navigator) {
+    return true; // Assume online during SSR
+  }
   return navigator.onLine;
 };
 
@@ -83,6 +87,11 @@ export const addOnlineOfflineListeners = (
   onOnline?: () => void,
   onOffline?: () => void
 ) => {
+  // Skip during SSR
+  if (typeof window === 'undefined') {
+    return () => {}; // Return no-op cleanup function
+  }
+
   const handleOnline = () => {
     console.log('App is online');
     onOnline?.();
@@ -195,6 +204,9 @@ export class OfflineManager {
   }
 }
 
-export const offlineManager = OfflineManager.getInstance();
+// Export a function to get the offline manager instance (lazy loading for SSR safety)
+export const getOfflineManager = (): OfflineManager => {
+  return OfflineManager.getInstance();
+};
 
 

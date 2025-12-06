@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parseGreenButtonXML } from '@/lib/xmlParser';
-import { validateUsageData, calculateDataQualityScore, getConfidenceLevel } from '@/lib/dataValidation';
+import { validateUsageData, calculateDataQualityScore } from '@/lib/dataValidation';
 import { generateRecommendations } from '@/lib/recommendationEngine';
 import { getPlans } from '@/lib/apiClients';
-import { CurrentPlanData, UserPreferences, ParsedUsageData } from '@/lib/types';
+import { CurrentPlanData, UserPreferences, ParsedUsageData, ContractTerms } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +13,8 @@ export async function POST(request: NextRequest) {
     const currentPlanJson = formData.get('currentPlan') as string;
     const preferencesJson = formData.get('preferences') as string;
     const xmlFile = formData.get('xmlFile') as File;
+    const earlyTerminationFeeJson = formData.get('earlyTerminationFee') as string | null;
+    const contractEndDateJson = formData.get('contractEndDate') as string | null;
 
     if (!currentPlanJson || !preferencesJson || !xmlFile) {
       return NextResponse.json(
@@ -23,6 +25,18 @@ export async function POST(request: NextRequest) {
 
     const currentPlan: CurrentPlanData = JSON.parse(currentPlanJson);
     const preferences: UserPreferences = JSON.parse(preferencesJson);
+
+    // Parse contract terms (optional)
+    let contractTerms: ContractTerms | undefined;
+    if (earlyTerminationFeeJson) {
+      const earlyTerminationFee = parseInt(earlyTerminationFeeJson);
+      if (!isNaN(earlyTerminationFee) && earlyTerminationFee >= 0 && earlyTerminationFee <= 2000) {
+        contractTerms = {
+          earlyTerminationFee,
+          contractEndDate: contractEndDateJson || undefined,
+        };
+      }
+    }
 
     // Validate preferences sum to 100
     if (Math.abs(preferences.costPriority + preferences.renewablePriority - 100) > 0.01) {
@@ -64,17 +78,8 @@ export async function POST(request: NextRequest) {
     // Use UtilityAPI key for supplier/plan data, fallback to EIA key or empty string
     const apiKey = utilityApiKey || eiaApiKey;
 
-    // Get available plans (now uses UtilityAPI with fallback to mock data)
-    let plans;
-    try {
-      plans = await getPlans(apiKey);
-    } catch (error) {
-      console.error('Error fetching plans:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch available plans. Please try again later.' },
-        { status: 500 }
-      );
-    }
+    // Get available plans (uses official Texas data)
+    const plans = await getPlans(apiKey);
 
     if (plans.length === 0) {
       return NextResponse.json(
@@ -91,16 +96,9 @@ export async function POST(request: NextRequest) {
         usageData,
         preferences,
         plans,
-        eiaApiKey
+        eiaApiKey,
+        contractTerms
       );
-
-      // Update confidence based on data quality
-      const qualityScore = calculateDataQualityScore(usageData);
-      const confidence = getConfidenceLevel(qualityScore);
-      recommendations = recommendations.map((rec) => ({
-        ...rec,
-        confidence,
-      }));
     } catch (error) {
       console.error('Error generating recommendations:', error);
       return NextResponse.json(

@@ -22,13 +22,14 @@ Future (Phase 2): User Browser → Firebase Hosting → Firebase Functions (Next
 ```
 
 ### Component Structure
-- **Frontend**: Single-page React application with progressive form steps
-- **Backend**: Next.js API routes for data processing (MVP), Firebase Functions (Phase 2)
-- **Processing**: In-memory Node.js processing (MVP), Firestore persistence (Phase 2)
+- **Frontend**: Single-page React application with progressive form steps (6 steps)
+- **Backend**: Next.js API routes for data processing with scenario calculations
+- **Processing**: In-memory Node.js processing with contract timing analysis
 - **Authentication**: Firebase Auth for user accounts (Phase 2)
 - **Database**: Firestore for user data, recommendations, and audit logs (Phase 2)
 - **External APIs**: EIA Open Data API for energy statistics (integrated December 2025)
 - **Supplier/Plan Data**: Static/mock data (MVP), Real retail supplier APIs (Phase 2)
+- **Scenario Engine**: Cost analysis with Stay Current, Switch Now, Wait & Switch calculations
 
 ## Key Technical Decisions
 
@@ -71,17 +72,30 @@ Future (Phase 2): User Browser → Firebase Hosting → Firebase Functions (Next
 XML File → Parse (fast-xml-parser) → Validate → Aggregate → Calculate Costs → Score Plans → Select Top 3
 ```
 
-### Recommendation Algorithm Pattern
+### Enhanced Recommendation Algorithm Pattern
 1. **Cost Calculation**: Annual cost for each plan based on usage
    ```typescript
    annualCost = sum(monthlyUsage × rate + deliveryFees + adminFees)
    ```
-2. **Scoring**: Weighted score based on preferences (cost + renewable + additional criteria)
+2. **Contract Analysis**: Process optional contract terms (fee + end date)
+   ```typescript
+   contractTerms = { earlyTerminationFee, contractEndDate }
+   ```
+3. **Scenario Calculation**: Generate three cost scenarios for each plan
+   ```typescript
+   scenarios = calculateCostScenarios(plan, currentPlanCost, contractTerms)
+   // Stay Current, Switch Now (+fee), Wait & Switch (prorated)
+   ```
+4. **Scoring**: Weighted score based on preferences (cost + renewable + additional criteria)
    ```typescript
    score = (costWeight × normalizedSavings) + (renewableWeight × normalizedRenewable) + additionalPreferences
    ```
-3. **Top Selection**: Select top 3 highest-scoring plans (pure preference-based, no forced diversity)
-4. **Explanation Generation**: Simple language explaining why each plan was chosen
+5. **Top Selection**: Select top 3 highest-scoring plans (pure preference-based)
+6. **Scenario Enhancement**: Add scenario data to recommendations
+   ```typescript
+   planWithScenarios = createPlanWithScenarios(plan, currentPlanCost, contractTerms)
+   ```
+7. **Explanation Generation**: Context-aware explanations including scenario recommendations
 
 ### Error Handling Pattern
 - **Validation at Each Step**: Prevent invalid data progression
@@ -115,7 +129,7 @@ page.tsx (Main)
 
 ### Data Flow
 ```
-Form Data + XML File
+Form Data + XML File + Contract Terms (optional)
     ↓
 API Route (/api/process-data)
     ↓
@@ -125,9 +139,9 @@ Data Validation → Validated Data
     ↓
 API Clients → Supplier & Plan Data (mock for MVP)
     ↓
-Recommendation Engine → Top 3 Recommendations
+Recommendation Engine → Cost Calculations → Scenario Analysis → Top 3 Enhanced Recommendations
     ↓
-Results Display (RecommendationList + RecommendationCard)
+Results Display (RecommendationList + RecommendationCard with Scenario Comparison)
 ```
 
 ## Key Implementation Patterns

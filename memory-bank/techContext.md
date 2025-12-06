@@ -81,7 +81,8 @@ EnergyPlan/
 │   │   ├── Step2CurrentPlan.tsx
 │   │   ├── Step3FileUpload.tsx
 │   │   ├── Step4Preferences.tsx
-│   │   └── Step5Review.tsx
+│   │   ├── Step5ContractDetails.tsx
+│   │   └── Step6Review.tsx
 │   ├── recommendations/          # Results display
 │   │   ├── RecommendationCard.tsx
 │   │   └── RecommendationList.tsx
@@ -152,7 +153,7 @@ EnergyPlan/
 ## Technical Constraints
 
 ### Runtime Constraints
-- **Node.js Version**: Must be 20+ (LTS) - tested with 25.1.0
+- **Node.js Version**: Must be >=20.0.0 (LTS) - tested with 25.1.0
 - **Browser Support**: Modern browsers (Chrome, Firefox, Safari, Edge)
 - **File Size Limits**: Maximum 10MB XML files
 - **Memory**: Efficient processing for large XML files (<50MB estimated)

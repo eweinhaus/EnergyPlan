@@ -1,4 +1,4 @@
-const { registerServiceWorker, offlineManager } = require('../lib/pwa');
+const { registerServiceWorker, getOfflineManager } = require('../lib/pwa');
 
 // Mock navigator and window
 const mockNavigator = {
@@ -79,6 +79,7 @@ describe('PWA Features', () => {
 
   describe('Offline Manager', () => {
     test('reports correct online status', () => {
+      const offlineManager = getOfflineManager();
       expect(offlineManager.getIsOnline()).toBe(true);
 
       mockNavigator.onLine = false;
@@ -90,6 +91,7 @@ describe('PWA Features', () => {
       const action = 'save-recommendation';
       const data = { userId: 'test-user', recommendations: [] };
 
+      const offlineManager = getOfflineManager();
       offlineManager.storePendingAction(action, data);
 
       expect(window.localStorage.setItem).toHaveBeenCalledWith(
@@ -111,7 +113,7 @@ describe('PWA Features', () => {
       window.localStorage.getItem.mockReturnValue(JSON.stringify(mockActions));
 
       // Access private method through instance
-      const manager = offlineManager;
+      const manager = getOfflineManager();
       // Note: In a real test, we'd need to expose private methods or test through public API
     });
   });
@@ -244,7 +246,7 @@ describe('Offline Functionality', () => {
 
   test('offline manager handles sync operations', () => {
     // Test the offline manager's sync capabilities
-    const manager = offlineManager;
+    const manager = getOfflineManager();
 
     expect(manager.getIsOnline()).toBeDefined();
     expect(typeof manager.getIsOnline()).toBe('boolean');

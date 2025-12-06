@@ -4,6 +4,7 @@ export interface CurrentPlanData {
   rate: number; // cents per kWh
   contractEndDate?: string;
   contractLength?: number; // months
+  earlyTerminationFee?: number; // Early termination fee in dollars ($0-$2000)
 }
 
 export interface UserPreferences {
@@ -118,11 +119,28 @@ export interface PlanWithCosts extends Plan {
   score: number;
 }
 
+// Contract and Scenario Types
+export interface ContractTerms {
+  earlyTerminationFee: number; // In dollars
+  contractEndDate?: string; // MM/YYYY format
+}
+
+export interface CostScenario {
+  type: 'stay-current' | 'switch-now' | 'wait-and-switch';
+  annualCost: number; // Expected annual cost in dollars
+  netSavings: number; // Compared to stay-current baseline (can be negative)
+  description: string; // Human-readable description
+}
+
+export interface PlanWithScenarios extends PlanWithCosts {
+  scenarios: CostScenario[];
+  recommendedScenario?: CostScenario; // The scenario with lowest annual cost
+}
+
 // Recommendation Types
 export interface Recommendation {
-  plan: PlanWithCosts;
+  plan: PlanWithScenarios;
   explanation: string;
-  confidence: 'high' | 'medium' | 'low';
 }
 
 export interface ProcessingResult {

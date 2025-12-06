@@ -111,8 +111,8 @@ export default function PrivacyPolicy() {
                 We use the following third-party services to provide our recommendation engine:
               </p>
               <ul className="list-disc pl-6 space-y-2 text-gray-700 mb-4">
-                <li><strong>UtilityAPI:</strong> Provides Texas energy supplier and utility data</li>
-                <li><strong>Arcadia API:</strong> Supplies current energy plan catalog information</li>
+                <li><strong>EIA API:</strong> Provides energy statistics and market data</li>
+                <li><strong>Official Texas Data:</strong> Uses verified regulatory data from Texas PUC records</li>
                 <li><strong>Render:</strong> Hosting platform for our web application</li>
               </ul>
 

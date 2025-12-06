@@ -24,19 +24,7 @@ export const PlanDetailsModal: React.FC<PlanDetailsModalProps> = ({
   usageData,
   suppliers = [],
 }) => {
-  const { plan, explanation, confidence } = recommendation;
-
-  const confidenceColors = {
-    high: 'bg-green-100 text-green-800',
-    medium: 'bg-yellow-100 text-yellow-800',
-    low: 'bg-red-100 text-red-800',
-  };
-
-  const confidenceLabels = {
-    high: 'High Confidence',
-    medium: 'Medium Confidence',
-    low: 'Low Confidence',
-  };
+  const { plan, explanation } = recommendation;
 
   const getRateStructureDescription = () => {
     if (!plan.rateStructure) {
@@ -178,42 +166,37 @@ export const PlanDetailsModal: React.FC<PlanDetailsModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={`${plan.supplierName} - ${plan.name}`}
-      className="max-w-6xl"
+      className="max-w-7xl"
     >
       <div className="space-y-3 max-h-[70vh] overflow-y-auto">
-        {/* Header with Rank and Confidence */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="bg-primary-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-base flex-shrink-0">
-              #{rank}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-bold text-gray-900 truncate">{plan.supplierName}</h2>
-              <p className="text-sm text-gray-600 truncate">{plan.name}</p>
-            </div>
+        {/* Header with Rank */}
+        <div className="flex items-center space-x-3">
+          <div className="bg-primary-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-base flex-shrink-0">
+            #{rank}
           </div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${confidenceColors[confidence]}`}>
-            {confidenceLabels[confidence]}
-          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg font-bold text-gray-900 truncate">{plan.supplierName}</h2>
+            <p className="text-sm text-gray-600 truncate">{plan.name}</p>
+          </div>
         </div>
 
         {/* Key Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-blue-50 rounded-lg p-3 text-center">
             <p className="text-xs text-blue-600 font-medium">Rate</p>
-            <p className="text-lg font-bold text-blue-900 break-words">{plan.rate}¢/kWh</p>
+            <p className="text-sm font-bold text-blue-900 break-words">{plan.rate}¢/kWh</p>
           </div>
           <div className="bg-green-50 rounded-lg p-3 text-center">
             <p className="text-xs text-green-600 font-medium">Annual Cost</p>
-            <p className="text-lg font-bold text-green-900 break-words">${plan.annualCost.toFixed(2)}</p>
+            <p className="text-sm font-bold text-green-900 break-words">${plan.annualCost.toFixed(2)}</p>
           </div>
           <div className="bg-purple-50 rounded-lg p-3 text-center">
             <p className="text-xs text-purple-600 font-medium">Renewable</p>
-            <p className="text-lg font-bold text-purple-900 break-words">{plan.renewablePercentage}%</p>
+            <p className="text-sm font-bold text-purple-900 break-words">{plan.renewablePercentage}%</p>
           </div>
           <div className="bg-orange-50 rounded-lg p-3 text-center">
             <p className="text-xs text-orange-600 font-medium">Savings</p>
-            <p className={`text-lg font-bold break-words ${plan.savings >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-sm font-bold break-words ${plan.savings >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {plan.savings >= 0 ? '+' : ''}${plan.savings.toFixed(2)}
             </p>
           </div>

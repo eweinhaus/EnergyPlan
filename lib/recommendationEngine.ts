@@ -1,14 +1,127 @@
 import {
   Plan,
   PlanWithCosts,
+  PlanWithScenarios,
   Recommendation,
   ParsedUsageData,
   CurrentPlanData,
   UserPreferences,
   RateStructure,
   MonthlyUsage,
+  CostScenario,
+  ContractTerms,
 } from './types';
 import { getSuppliers } from './apiClients';
+
+/**
+ * Parse contract end date from MM/YYYY format
+ */
+export function parseContractDate(dateString?: string): Date | null {
+  if (!dateString) return null;
+
+  const [month, year] = dateString.split('/');
+  const monthNum = parseInt(month) - 1; // 0-based
+  const yearNum = parseInt(year);
+
+  // Validate date
+  if (isNaN(monthNum) || isNaN(yearNum) || monthNum < 0 || monthNum > 11) {
+    return null;
+  }
+
+  return new Date(yearNum, monthNum, 1); // First day of the month
+}
+
+/**
+ * Calculate months remaining until contract end
+ */
+export function calculateMonthsRemaining(contractEndDate: Date): number {
+  const now = new Date();
+  const endOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  const monthsDiff = (contractEndDate.getFullYear() - endOfCurrentMonth.getFullYear()) * 12 +
+                    (contractEndDate.getMonth() - endOfCurrentMonth.getMonth());
+
+  return Math.max(0, monthsDiff);
+}
+
+/**
+ * Calculate cost scenarios for a plan
+ */
+export function calculateCostScenarios(
+  plan: PlanWithCosts,
+  currentPlanCost: number,
+  contractTerms: ContractTerms
+): CostScenario[] {
+  const scenarios: CostScenario[] = [];
+
+  // Scenario 1: Stay with Current Plan (baseline)
+  scenarios.push({
+    type: 'stay-current',
+    annualCost: currentPlanCost,
+    netSavings: 0,
+    description: 'Continue with your current plan',
+  });
+
+  // Scenario 2: Switch Now
+  const switchNowCost = plan.annualCost + contractTerms.earlyTerminationFee;
+  scenarios.push({
+    type: 'switch-now',
+    annualCost: switchNowCost,
+    netSavings: currentPlanCost - switchNowCost,
+    description: `Switch now (+$${contractTerms.earlyTerminationFee} fee)`,
+  });
+
+  // Scenario 3: Wait and Switch (if contract end date provided)
+  if (contractTerms.contractEndDate) {
+    const contractEnd = parseContractDate(contractTerms.contractEndDate);
+    if (contractEnd) {
+      const monthsRemaining = calculateMonthsRemaining(contractEnd);
+
+      if (monthsRemaining > 0) {
+        // Cost during remaining contract period (current plan)
+        const contractPeriodCost = (currentPlanCost / 12) * monthsRemaining;
+
+        // Cost after contract ends (recommended plan)
+        const postContractMonths = 12 - monthsRemaining;
+        const postContractCost = (plan.annualCost / 12) * postContractMonths;
+
+        // Total annual equivalent cost
+        const waitAndSwitchCost = contractPeriodCost + postContractCost;
+
+        scenarios.push({
+          type: 'wait-and-switch',
+          annualCost: waitAndSwitchCost,
+          netSavings: currentPlanCost - waitAndSwitchCost,
+          description: `Wait until ${contractTerms.contractEndDate}, then switch`,
+        });
+      }
+    }
+  }
+
+  return scenarios;
+}
+
+/**
+ * Create PlanWithScenarios from PlanWithCosts
+ */
+export function createPlanWithScenarios(
+  plan: PlanWithCosts,
+  currentPlanCost: number,
+  contractTerms: ContractTerms
+): PlanWithScenarios {
+  const scenarios = calculateCostScenarios(plan, currentPlanCost, contractTerms);
+
+  // Find the recommended scenario (lowest annual cost)
+  const recommendedScenario = scenarios.reduce((best, current) =>
+    current.annualCost < best.annualCost ? current : best
+  );
+
+  return {
+    ...plan,
+    scenarios,
+    recommendedScenario,
+  };
+}
 
 /**
  * Calculate annual cost for a plan based on usage data and rate structure
@@ -351,7 +464,8 @@ export async function generateRecommendations(
   usageData: ParsedUsageData,
   preferences: UserPreferences,
   allPlans: Plan[],
-  utilityApiKey: string
+  utilityApiKey?: string,
+  contractTerms?: ContractTerms
 ): Promise<Recommendation[]> {
   // Get suppliers for rating information
   const suppliers = await getSuppliers(utilityApiKey);
@@ -377,11 +491,34 @@ export async function generateRecommendations(
   // Select top 3 highest-scoring plans
   const topPlans = selectTopRecommendations(plansWithCosts);
 
+  // Calculate current plan annual cost for scenarios
+  const currentPlanAnnualCost = calculateAnnualCost(
+    {
+      id: 'current',
+      supplierId: 'current',
+      supplierName: currentPlan.supplier,
+      name: 'Current Plan',
+      rate: currentPlan.rate,
+      renewablePercentage: 0, // Not relevant for current plan
+      fees: { delivery: 0, admin: 0 }, // Fees already included in rate
+    },
+    usageData
+  );
+
+  // Create plans with scenarios (use default contract terms if none provided)
+  const defaultContractTerms: ContractTerms = contractTerms || {
+    earlyTerminationFee: 150, // Default industry average
+    contractEndDate: undefined
+  };
+
+  const finalPlans = topPlans.map(plan =>
+    createPlanWithScenarios(plan, currentPlanAnnualCost, defaultContractTerms)
+  );
+
   // Generate recommendations with explanations
-  const recommendations: Recommendation[] = topPlans.map((plan) => ({
+  const recommendations: Recommendation[] = finalPlans.map((plan) => ({
     plan,
     explanation: generateExplanation(plan, preferences),
-    confidence: 'high', // Will be adjusted based on data quality later
   }));
 
   return recommendations;
