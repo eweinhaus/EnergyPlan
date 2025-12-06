@@ -36,8 +36,8 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
   return (
     <>
-      <Card
-        className="relative h-full flex flex-col overflow-visible cursor-pointer hover:shadow-lg transition-shadow duration-200"
+      <div
+        className="relative h-full flex flex-col overflow-visible cursor-pointer hover:shadow-lg transition-shadow duration-200 bg-white rounded-lg shadow-md p-6"
         onClick={() => setIsModalOpen(true)}
       >
       {/* Rank Badge */}
@@ -170,7 +170,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
           </Button>
         </div>
       </div>
-    </Card>
+    </div>
 
     <PlanDetailsModal
       isOpen={isModalOpen}
