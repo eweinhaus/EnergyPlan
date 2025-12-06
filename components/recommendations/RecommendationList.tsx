@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { RecommendationCard } from './RecommendationCard';
 import { Alert } from '../ui/Alert';
 import { Button } from '../ui/Button';
-import { Recommendation, EnergyPlanFormData } from '@/lib/types';
+import { Recommendation, EnergyPlanFormData, CurrentPlanData, ParsedUsageData } from '@/lib/types';
 import { generatePDFReport, downloadPDF } from '@/lib/pdfGenerator.client';
 
 interface RecommendationListProps {

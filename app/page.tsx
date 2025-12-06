@@ -45,13 +45,15 @@ export default function Home() {
 
   // Clear localStorage on mount to ensure fresh start and setup data deletion
   useEffect(() => {
-    localStorage.removeItem('energyPlanFormData');
-    setupUnloadDataDeletion();
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('energyPlanFormData');
+      setupUnloadDataDeletion();
+    }
   }, []);
 
   // Save to localStorage whenever formData changes
   useEffect(() => {
-    if (currentStep > 1) {
+    if (typeof window !== 'undefined' && currentStep > 1) {
       const toSave = {
         ...formData,
         xmlFile: undefined, // Don't save File object
@@ -143,7 +145,9 @@ export default function Home() {
       }
 
       // Clear localStorage after successful submission
-      localStorage.removeItem('energyPlanFormData');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('energyPlanFormData');
+      }
     } catch (error) {
       console.error('Error submitting form:', error);
       setError(error instanceof Error ? error.message : 'An error occurred. Please try again.');
@@ -169,7 +173,9 @@ export default function Home() {
         renewablePriority: 50,
       },
     });
-    localStorage.removeItem('energyPlanFormData');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('energyPlanFormData');
+    }
   };
 
   const handleConsentChange = (newConsent: ConsentState) => {
