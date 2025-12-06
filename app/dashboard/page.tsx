@@ -32,7 +32,7 @@ export default function Dashboard() {
     if (user) {
       loadRecommendations();
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, loadRecommendations]);
 
   const loadRecommendations = async () => {
     try {

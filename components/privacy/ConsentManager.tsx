@@ -31,7 +31,7 @@ export const ConsentManager: React.FC<ConsentManagerProps> = ({ onConsentChange 
     if (user) {
       loadUserConsent();
     }
-  }, [user]);
+  }, [user, loadUserConsent]);
 
   const loadUserConsent = async () => {
     if (!user) return;
