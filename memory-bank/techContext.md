@@ -98,16 +98,20 @@ EnergyPlan/
 │   │   ├── Step2CurrentPlan.tsx
 │   │   ├── Step3FileUpload.tsx
 │   │   ├── Step4Preferences.tsx
-│   │   ├── Step5ContractDetails.tsx
-│   │   └── Step6Review.tsx
+│   │   ├── Step4Review.tsx       # Used for Step 5 (final review)
+│   │   └── Step5Review.tsx       # Legacy component (not used)
 │   ├── recommendations/          # Results display
 │   │   ├── RecommendationCard.tsx
-│   │   └── RecommendationList.tsx
+│   │   ├── RecommendationList.tsx
+│   │   └── PlanDetailsModal.tsx
 │   └── ui/                       # Reusable UI components
 │       ├── Alert.tsx
 │       ├── Button.tsx
 │       ├── Card.tsx
+│       ├── ConsentBanner.tsx    # GDPR consent management
+│       ├── DataProcessingTransparency.tsx  # Data collection transparency
 │       ├── Input.tsx
+│       ├── Modal.tsx
 │       └── ProgressBar.tsx
 ├── lib/
 │   ├── apiClients.ts             # API integration clients
@@ -277,9 +281,11 @@ node monitor-deployment.js [command]
 
 ### Hosting Platform
 - **Current (MVP)**: Vercel (migrated from Render - $0/month vs $7/month)
-- **Deployment**: Successfully deployed and live in production at https://EnergyPlan.vercel.app
+- **Deployment**: Successfully deployed and live in production at https://EnergyPlan.vercel.app (or https://energy-plan-mvp.vercel.app)
 - **Configuration**: Vercel automatic deployments via GitHub integration
 - **Environment**: Production environment variables configured and active
+- **Runtime**: Edge runtime configured for main page to avoid SSR issues with Firebase
+- **Legacy Files**: render.yaml and monitor-deployment.js remain for reference but not actively used
 - **Future (Phase 2)**: Optional migration to Firebase Hosting (currently on Vercel)
 - **Firebase Setup**: Complete configuration files ready (Firebase Auth and Firestore implemented, requires config)
 

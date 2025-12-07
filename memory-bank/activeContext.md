@@ -31,15 +31,18 @@ The Energy Plan Recommendation Agent MVP is **COMPLETE, DEPLOYED, AND LIVE** in 
 - Updated CurrentPlanData interface to include earlyTerminationFee and contractEndDate
 - Enhanced Step2CurrentPlan with contract fee input and educational content
 - Modified form flow to use 5 steps total (Welcome → Current Plan → File Upload → Preferences → Review)
+- Added ConsentBanner component for GDPR-compliant consent management
+- Added DataProcessingTransparency component showing data collection details at each step
 - Updated all step references throughout the codebase
 - Fixed TypeScript compilation issues with scenario-based types
 
 **Current Form Flow:**
-1. Step 1: Welcome screen
-2. Step 2: Current plan details (including optional contract information)
+1. Step 1: Welcome screen (with privacy consent in ConsentBanner)
+2. Step 2: Current plan details (including optional contract information: earlyTerminationFee, contractEndDate)
 3. Step 3: File upload (Green Button XML)
 4. Step 4: Preferences (cost/renewable + optional advanced preferences)
-5. Step 5: Review and submit
+5. Step 5: Review and submit (using Step4Review component)
+6. Step 6: Results display (after processing completes)
 
 ### ✅ **Recommendation Logic & Cost Analysis Enhancement** (December 2025)
 
@@ -50,12 +53,12 @@ The Energy Plan Recommendation Agent MVP is **COMPLETE, DEPLOYED, AND LIVE** in 
 - 40-60% of consumers cite early termination fees as primary switching barrier
 
 **Changes Implemented:**
-- **Contract Fee Input**: Added optional Step 5 (Contract Details) with early termination fee and end date inputs
+- **Contract Fee Input**: Integrated contract details (early termination fee and end date) into Step 2 (Current Plan) for logical grouping
 - **Three Scenario Calculations**: Implemented "Stay Current", "Switch Now", and "Wait & Switch" cost scenarios
 - **Enhanced Recommendation Engine**: Updated to calculate and display scenario-based financial analysis
 - **Scenario Display UI**: Modified RecommendationCard to show three-column scenario comparison with recommended option highlighting
 - **Educational Content**: Added help popups and explanations for contract terms and financial scenarios
-- **Form Flow**: Extended from 5 to 6 steps with optional contract input (skip functionality maintained)
+- **Form Flow**: Maintained 5-step flow with contract details integrated into Step 2 (not a separate step)
 
 **Key Benefits:**
 - **Concrete Financial Scenarios**: Shows exact dollar impacts instead of vague risk warnings
@@ -124,6 +127,12 @@ The Energy Plan Recommendation Agent MVP is **COMPLETE, DEPLOYED, AND LIVE** in 
 
 ### ✅ Recent Deployment Fixes & Enhancements (December 2025)
 
+**GDPR Compliance & Data Transparency:**
+- **ConsentBanner Component**: Implemented GDPR-compliant consent management banner with granular consent options (necessary, analytics, data processing, marketing)
+- **DataProcessingTransparency Component**: Added transparency component showing data collection details, processing methods, legal basis, and retention policies at each form step
+- **Consent Storage**: Consent preferences stored in localStorage with versioning for future updates
+- **User Control**: Users can manage consent preferences and see exactly what data is collected at each step
+
 **Supplier Signup URL Functionality:**
 - **Added Supplier Signup**: Implemented supplier signup URL functionality in PlanDetailsModal
 - **Enhanced Plan Modal**: Added clickable "Sign Up" buttons that open supplier signup pages in new tabs
@@ -136,6 +145,7 @@ The Energy Plan Recommendation Agent MVP is **COMPLETE, DEPLOYED, AND LIVE** in 
 - **React Hook Fixes**: Wrapped loadRecommendations and loadUserConsent in useCallback to prevent dependency changes
 - **Component Fixes**: Fixed Card component onClick prop error by replacing Card wrapper with div for click handling
 - **Node.js Version**: Updated deployment requirements to Node.js >=20.0.0 for compatibility
+- **Edge Runtime**: Configured edge runtime for main page to avoid SSR issues with Firebase
 
 **Code Quality:**
 - **Formatting**: Removed trailing whitespace from multiple files for cleaner codebase

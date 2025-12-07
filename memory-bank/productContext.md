@@ -23,11 +23,11 @@ The MVP addresses this by providing a simple, focused tool that processes real u
 ## How It Should Work
 
 ### Enhanced User Journey
-1. **Welcome**: User sees value proposition and provides privacy consent
+1. **Welcome**: User sees value proposition and manages GDPR consent via ConsentBanner
 2. **Current Plan**: User enters existing plan details (supplier, rate) and optional contract information (early termination fee, contract end date)
 3. **Upload XML**: User uploads Green Button XML file with usage history
 4. **Preferences**: User sets priorities for cost savings vs renewable energy + optional advanced preferences
-5. **Review**: User reviews entered information and submits
+5. **Review**: User reviews entered information and submits (with data processing transparency shown)
 6. **Enhanced Results**: User sees top 3 personalized recommendations with **three cost scenarios** (Stay Current, Switch Now, Wait & Switch)
 
 ### Core Workflow
@@ -53,7 +53,8 @@ User Input → XML Processing → Usage Analysis → Plan Matching → Recommend
 - **Clear Explanations**: Simple language describing why each plan was recommended
 - **Data Quality Indicators**: Show confidence levels based on data completeness
 - **Accurate Projections**: Transparent cost calculations with savings estimates
-- **Privacy Respect**: Clear consent and data handling policies
+- **Privacy Respect**: GDPR-compliant ConsentBanner with granular consent options
+- **Data Transparency**: DataProcessingTransparency component shows exactly what data is collected, how it's processed, legal basis, and retention at each step
 
 ### Performance
 - **Fast Processing**: <10 seconds for recommendation generation

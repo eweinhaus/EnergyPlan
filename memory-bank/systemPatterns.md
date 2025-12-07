@@ -64,8 +64,10 @@ Future (Phase 2): User Browser → Firebase Hosting → Firebase Functions (Next
 
 ### Form State Management
 - **React useState**: Single state object for all form data (`EnergyPlanFormData`)
-- **Step-Based Navigation**: Controlled step progression with validation
+- **Step-Based Navigation**: Controlled step progression with validation (5 steps + results view)
 - **localStorage Backup**: Auto-save form progress during session (cleared on close)
+- **Consent Management**: ConsentBanner manages GDPR consent preferences with localStorage persistence
+- **Data Transparency**: DataProcessingTransparency component shows data collection details at each step
 
 ### Data Processing Pipeline
 ```
@@ -109,12 +111,14 @@ XML File → Parse (fast-xml-parser) → Validate → Aggregate → Calculate Co
 ```
 page.tsx (Main)
 ├── ProgressBar
+├── ConsentBanner (GDPR consent management)
+├── DataProcessingTransparency (shows at each step)
 ├── Step1Welcome
 ├── Step2CurrentPlan (includes contract details: earlyTerminationFee, contractEndDate)
 ├── Step3FileUpload
 ├── Step4Preferences
 ├── Step4Review (Step 5 - final review)
-└── RecommendationList (after processing)
+└── RecommendationList (after processing, Step 6)
     └── RecommendationCard (×3)
 ```
 
@@ -225,11 +229,12 @@ score = costScore + renewableScore + supplierScore
 - **File Validation**: XML format and size validation before processing
 
 ### Privacy Compliance
-- **Consent Management**: Privacy consent removed per user preference (MVP)
+- **Consent Management**: ConsentBanner component for GDPR-compliant consent with granular options (necessary, analytics, data processing, marketing)
+- **Data Transparency**: DataProcessingTransparency component shows what data is collected, how it's processed, legal basis, and retention at each step
 - **Data Minimization**: Only collect necessary data
-- **Transparency**: Clear data usage explanations
+- **Transparency**: Clear data usage explanations at each form step
 - **Session-Only**: Data cleared when browser closes
-- **Future**: GDPR/CCPA compliance features
+- **Consent Storage**: Consent preferences stored in localStorage with versioning
 
 ## Performance Patterns
 
